@@ -19,13 +19,13 @@ DRY=${1:-}
 
 files=()
 while read -r sha url name; do
-  [ -n "$sha" ] && files+=("$W/dl/pinned/$name")
+  if [ -n "$sha" ]; then files+=("$W/dl/pinned/$name"); fi
 done < <(grep -v '^#' $B/pins.txt)
 while read -r sha url; do
-  [ -n "$sha" ] && files+=("$W/dl/pinned/cpan/$(basename "$url")")
+  if [ -n "$sha" ]; then files+=("$W/dl/pinned/cpan/$(basename "$url")"); fi
 done < <(grep -v '^#' $B/scripts/cpan-pins.sha256)
 while read -r sha url name; do
-  [ -n "$sha" ] && [ "$sha" != termux-packages ] && files+=("$W/dl/sources/$name")
+  if [ -n "$sha" ] && [ "$sha" != termux-packages ]; then files+=("$W/dl/sources/$name"); fi
 done < <(grep -v '^#' $B/source-pins.txt)
 
 for f in "${files[@]}"; do [ -f "$f" ] || { echo "missing $f: run ./build.sh fetch and scripts/sources.sh first" >&2; exit 1; }; done

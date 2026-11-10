@@ -46,8 +46,14 @@ grep -v '^#' $B/source-pins.txt | while read -r sha url name rest; do
   cp $f $T/upstream/
 done
 
-cp -a $W/dl/pinned/. $T/pinned/
-rm -f $T/pinned/termux-docker-layer.tar.gz $T/pinned/*.deb   # build tools and binaries, not source
+# The pinned source tarballs, not the binaries (.deb files, the termux-docker layer).
+grep -v '^#' $B/pins.txt | while read -r sha url name; do
+  case $name in ''|*.deb|termux-docker-layer.tar.gz) ;; *) cp $W/dl/pinned/$name $T/pinned/ ;; esac
+done
+mkdir -p $T/pinned/cpan
+grep -v '^#' $B/scripts/cpan-pins.sha256 | while read -r sha url; do
+  if [ -n "$sha" ]; then cp $W/dl/pinned/cpan/$(basename $url) $T/pinned/cpan/; fi
+done
 if git -C $B rev-parse --verify -q HEAD >/dev/null; then
   git -C $B archive --format=tar --prefix=biber-android/ HEAD | tar -x -C $T
 fi
