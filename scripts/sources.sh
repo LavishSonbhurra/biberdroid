@@ -1,20 +1,20 @@
 #!/bin/bash
 # Collects the complete source of everything the payload ships into one tar,
 # work/sources/sources.tar, which each release carries as
-# biber-android-<version>-sources.tar:
+# biberdroid-<version>-sources.tar:
 #
 #   pinned/        biber, every CPAN distribution and cpanm, as downloaded by fetch
 #   upstream/      Perl (with perl-cross, which Termux builds it with), libxml2,
 #                  zlib and libiconv source tarballs (source-pins.txt)
 #   termux/        Termux's recipes and patches for those four packages, and its
 #                  build scripts, at the commit named in source-pins.txt
-#   biber-android/ this repository at the commit being built
+#   biberdroid/    this repository at the commit being built
 #
 # Run after fetch. Needs curl, git and tar. Uses BIBER_MIRROR as build.sh does.
 set -euo pipefail
 B=$(cd "$(dirname "$0")/.." && pwd)
 W=${BIBER_WORK:-$B/work}
-MIRROR=${BIBER_MIRROR:-https://github.com/LavishSonbhurra/biber-android/releases/download/pinned-downloads}
+MIRROR=${BIBER_MIRROR:-https://github.com/LavishSonbhurra/biberdroid/releases/download/pinned-downloads}
 DL=$W/dl/sources
 T=$W/sources/tree
 mkdir -p $DL
@@ -55,10 +55,10 @@ grep -v '^#' $B/scripts/cpan-pins.sha256 | while read -r sha url; do
   if [ -n "$sha" ]; then cp $W/dl/pinned/cpan/$(basename $url) $T/pinned/cpan/; fi
 done
 if git -C $B rev-parse --verify -q HEAD >/dev/null; then
-  git -C $B archive --format=tar --prefix=biber-android/ HEAD | tar -x -C $T
+  git -C $B archive --format=tar --prefix=biberdroid/ HEAD | tar -x -C $T
 fi
 cat > $T/README.txt <<'EOF'
-The complete source of a biber-android release.
+The complete source of a biberdroid release.
 
 pinned/         biber 2.21 and the CPAN distributions it uses, exactly as the
                 build downloaded them (unchanged; cpanm is a build tool only)
@@ -67,11 +67,11 @@ upstream/       the upstream source of Perl 5.44.0 (built with perl-cross 1.6.5)
 termux-packages-<commit>/
                 Termux's recipes and patches for those packages, and the scripts
                 that build them (https://github.com/termux/termux-packages)
-biber-android/  the build scripts, the launcher and the Android library
+biberdroid/     the build scripts, the launcher and the Android library
 
 The shipped libperl.so, libxml216.so, libz1.so and libiconv.so are Termux's
 builds of these sources, changed afterwards only with patchelf, as
-biber-android/scripts/package.py describes.
+biberdroid/scripts/package.py describes.
 EOF
 mv $T/termux/* $T/ && rmdir $T/termux
 (cd $T && tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner -cf $W/sources/sources.tar .)

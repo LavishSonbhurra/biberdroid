@@ -1,4 +1,4 @@
-# Building biber-android
+# Building biberdroid
 
 - [Host](#host)
 - [Steps](#steps)
@@ -126,10 +126,10 @@ from the folder named by the Gradle property `biber.payload` or the environment 
 
 ```sh
 cd android
-./gradlew :biber:testReleaseUnitTest :biber:assembleRelease
+./gradlew :biberdroid:testReleaseUnitTest :biberdroid:assembleRelease
 ```
 
-The AAR is in `android/biber/build/outputs/aar/`. Needs JDK 17 and the Android SDK
+The AAR is in `android/biberdroid/build/outputs/aar/`. Needs JDK 17 and the Android SDK
 (platform 36, build tools 35). Android's `aapt2` is an x86_64 program, so on an arm64 Linux
 host it has to run under qemu-user with an x86_64 sysroot (`QEMU_LD_PREFIX`); CI builds the
 library on an x86_64 runner instead.

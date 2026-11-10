@@ -45,7 +45,7 @@ concurrency:
 
 env:
   # v2.21-1 -> 2.21-1; anything else builds 2.21-dev.
-  BIBER_ANDROID_VERSION: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v2.21-dev' }}
+  BIBERDROID_VERSION: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v2.21-dev' }}
 
 jobs:
   payload:
@@ -57,7 +57,7 @@ jobs:
           persist-credentials: false
 
       - name: Version
-        run: echo "BIBER_ANDROID_VERSION=${BIBER_ANDROID_VERSION#v}" >> "$GITHUB_ENV"
+        run: echo "BIBERDROID_VERSION=${BIBERDROID_VERSION#v}" >> "$GITHUB_ENV"
 
       - name: Install host tools
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends patchelf
@@ -118,7 +118,7 @@ jobs:
           persist-credentials: false
 
       - name: Version
-        run: echo "BIBER_ANDROID_VERSION=${BIBER_ANDROID_VERSION#v}" >> "$GITHUB_ENV"
+        run: echo "BIBERDROID_VERSION=${BIBERDROID_VERSION#v}" >> "$GITHUB_ENV"
 
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
@@ -140,10 +140,10 @@ jobs:
       - name: Build and test the AAR
         working-directory: android
         run: |
-          ./gradlew --no-daemon -PbiberAndroidVersion="$BIBER_ANDROID_VERSION" \
-            :biber:testReleaseUnitTest :biber:assembleRelease
+          ./gradlew --no-daemon -PbiberdroidVersion="$BIBERDROID_VERSION" \
+            :biberdroid:testReleaseUnitTest :biberdroid:assembleRelease
           mkdir -p ../aar
-          cp biber/build/outputs/aar/biber-release.aar "../aar/biber-android-$BIBER_ANDROID_VERSION.aar"
+          cp biberdroid/build/outputs/aar/biberdroid-release.aar "../aar/biberdroid-$BIBERDROID_VERSION.aar"
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -162,7 +162,7 @@ jobs:
       contents: write
     steps:
       - name: Version
-        run: echo "BIBER_ANDROID_VERSION=${BIBER_ANDROID_VERSION#v}" >> "$GITHUB_ENV"
+        run: echo "BIBERDROID_VERSION=${BIBERDROID_VERSION#v}" >> "$GITHUB_ENV"
 
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
@@ -185,13 +185,13 @@ jobs:
           {
             echo "biber 2.21 for Android (arm64-v8a, API 26 and later), for biblatex 3.21."
             echo
-            echo "The Android library is the .aar below; the README shows how to use it. It is on Maven Central as \`io.github.lavishsonbhurra:biber-android:$BIBER_ANDROID_VERSION\` only once the Central upload of this version has been published. The sources file holds the complete source of everything in the payload."
+            echo "The Android library is the .aar below; the README shows how to use it. It is on Maven Central as \`io.github.lavishsonbhurra:biberdroid:$BIBERDROID_VERSION\` only once the Central upload of this version has been published. The sources file holds the complete source of everything in the payload."
             echo
             echo '```'
             cat dist/SHA256SUMS
             echo '```'
           } > notes.md
-          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "biber-android $BIBER_ANDROID_VERSION" \
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "biberdroid $BIBERDROID_VERSION" \
             --notes-file notes.md --verify-tag dist/*
 
   # ---------------------------------------------------------------------------------------
@@ -206,7 +206,7 @@ jobs:
     steps:
       - name: Secrets
         run: |
-          echo "BIBER_ANDROID_VERSION=${BIBER_ANDROID_VERSION#v}" >> "$GITHUB_ENV"
+          echo "BIBERDROID_VERSION=${BIBERDROID_VERSION#v}" >> "$GITHUB_ENV"
           if [ "$HAVE_SECRETS" != true ]; then
             echo "::notice::Maven Central secrets are not set; nothing to sign or upload."
           fi
@@ -250,11 +250,11 @@ jobs:
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
           SIGNING_PASSPHRASE: ${{ secrets.SIGNING_PASSPHRASE }}
         run: |
-          ./gradlew --no-daemon -PbiberAndroidVersion="$BIBER_ANDROID_VERSION" \
-            :biber:publishReleasePublicationToStagingRepository
+          ./gradlew --no-daemon -PbiberdroidVersion="$BIBERDROID_VERSION" \
+            :biberdroid:publishReleasePublicationToStagingRepository
           # What goes to Central must be the AAR that was tested and goes into the release.
-          cmp build/central-staging/io/github/lavishsonbhurra/biber-android/"$BIBER_ANDROID_VERSION"/biber-android-"$BIBER_ANDROID_VERSION".aar \
-            ../aar/biber-android-"$BIBER_ANDROID_VERSION".aar
+          cmp build/central-staging/io/github/lavishsonbhurra/biberdroid/"$BIBERDROID_VERSION"/biberdroid-"$BIBERDROID_VERSION".aar \
+            ../aar/biberdroid-"$BIBERDROID_VERSION".aar
           python3 -I ../scripts/central-bundle.py --repo build/central-staging --out ../central-bundle.zip
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -277,7 +277,7 @@ jobs:
     steps:
       - name: Secrets
         run: |
-          echo "BIBER_ANDROID_VERSION=${BIBER_ANDROID_VERSION#v}" >> "$GITHUB_ENV"
+          echo "BIBERDROID_VERSION=${BIBERDROID_VERSION#v}" >> "$GITHUB_ENV"
           if [ "$HAVE_SECRETS" != true ]; then
             echo "::notice::Maven Central secrets are not set; skipping the upload."
           fi
@@ -297,4 +297,4 @@ jobs:
         env:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
-        run: python3 -I scripts/central-upload.py --bundle central-bundle.zip --name "biber-android $BIBER_ANDROID_VERSION"
+        run: python3 -I scripts/central-upload.py --bundle central-bundle.zip --name "biberdroid $BIBERDROID_VERSION"

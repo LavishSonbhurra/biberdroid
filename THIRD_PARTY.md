@@ -4,8 +4,8 @@ The payload (the files in `jniLibs/arm64-v8a` and the Perl tree) is made of the 
 below, generated from the build's `COMPONENTS.tsv`. Each release also carries:
 
 - `NOTICES.txt`: this list with the full licence texts, for an app's licences screen.
-  The AAR holds the same file as `assets/biber-android/NOTICES.txt`.
-- `biber-android-<version>-sources.tar`: the complete source of everything listed here.
+  The AAR holds the same file as `assets/biberdroid/NOTICES.txt`.
+- `biberdroid-<version>-sources.tar`: the complete source of everything listed here.
 - `COMPONENTS.tsv` and, inside the payload archive, `FILES.tsv`, which maps every shipped
   file to its component.
 
@@ -17,7 +17,7 @@ the Unicode License v3. The licence texts are in [licenses/](licenses).
 | Component | Version | Licence | Source | Files |
 | --- | --- | --- | --- | ---: |
 | biber | 2.21 | Artistic-2.0 | <https://github.com/plk/biber/archive/refs/tags/v2.21.tar.gz> | 37 |
-| biber-android | - | Artistic-2.0 | <https://github.com/LavishSonbhurra/biber-android> (src/biber-launcher.c, src/BiberNative.pm) | 2 |
+| biberdroid | - | Artistic-2.0 | <https://github.com/LavishSonbhurra/biberdroid> (src/biber-launcher.c, src/BiberNative.pm) | 2 |
 | libiconv | 1.19.1 (Termux libiconv 1.19.1) | LGPL-2.1-or-later | <https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.19.1.tar.gz><br><https://github.com/termux/termux-packages/tree/master/packages/libiconv> | 1 |
 | libxml2 | 2.15.4 (Termux libxml2 2.15.4-1) | MIT | <https://download.gnome.org/sources/libxml2/2.15/libxml2-2.15.4.tar.xz><br><https://github.com/termux/termux-packages/tree/master/packages/libxml2> | 1 |
 | perl | 5.44.0 (Termux perl 5.44.0-1) | (Artistic-1.0-Perl OR GPL-1.0-or-later) AND Unicode-3.0 | <https://www.cpan.org/src/5.0/perl-5.44.0.tar.gz><br><https://github.com/termux/termux-packages/tree/master/packages/perl> | 263 |

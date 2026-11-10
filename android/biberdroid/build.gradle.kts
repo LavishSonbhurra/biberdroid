@@ -1,18 +1,18 @@
-// io.github.lavishsonbhurra:biber-android: biber for Android as an AAR.
+// io.github.lavishsonbhurra:biberdroid: biber for Android as an AAR.
 //
 // The AAR holds the payload ../build.sh makes, which is never committed:
 //   jni/arm64-v8a/                    libbiber.so (the launcher), libperl.so, libxml216.so,
 //                                     libz1.so, libiconv.so and the libpl_*.so XS modules
-//   assets/biber-android/perl-tree.tar.xz   the Perl tree, unpacked by Biber.install
-//   assets/biber-android/perl-tree.version  its SHA-256, the installed tree's version
-//   assets/biber-android/NOTICES.txt        licences of everything in the payload
+//   assets/biberdroid/perl-tree.tar.xz   the Perl tree, unpacked by Biber.install
+//   assets/biberdroid/perl-tree.version  its SHA-256, the installed tree's version
+//   assets/biberdroid/NOTICES.txt        licences of everything in the payload
 // and the Kotlin API in src/main/kotlin.
 //
 // Name the payload folder (BIBER_WORK/out after ./build.sh package) with the Gradle
 // property biber.payload or the environment variable BIBER_PAYLOAD; the default is
 // ../work/out from the repository root.
 //
-// Publishing: ./gradlew :biber:publishReleasePublicationToStagingRepository writes a
+// Publishing: ./gradlew :biberdroid:publishReleasePublicationToStagingRepository writes a
 // Maven repository to build/central-staging. It is signed when a key is given:
 //   signingInMemoryKey, signingInMemoryKeyPassword      (Gradle properties), or
 //   SIGNING_KEY, SIGNING_PASSPHRASE                     (environment)
@@ -27,12 +27,12 @@ plugins {
 }
 
 group = "io.github.lavishsonbhurra"
-version = providers.gradleProperty("biberAndroidVersion").get()
+version = providers.gradleProperty("biberdroidVersion").get()
 
-val repoUrl = "https://github.com/LavishSonbhurra/biber-android"
+val repoUrl = "https://github.com/LavishSonbhurra/biberdroid"
 
 android {
-    namespace = "io.github.lavishsonbhurra.biber"
+    namespace = "io.github.lavishsonbhurra.biberdroid"
     compileSdk = 36
 
     defaultConfig {
@@ -135,7 +135,7 @@ abstract class PayloadTask : DefaultTask() {
             require(tree.isFile && notices.isFile) {
                 "No perl-tree.tar.xz or NOTICES.txt in $from: run ../build.sh package"
             }
-            val dir = File(out, "biber-android").apply { mkdirs() }
+            val dir = File(out, "biberdroid").apply { mkdirs() }
             tree.copyTo(File(dir, "perl-tree.tar.xz"))
             notices.copyTo(File(dir, "NOTICES.txt"))
             val sha = MessageDigest.getInstance("SHA-256").digest(tree.readBytes())
@@ -171,10 +171,10 @@ publishing {
     }
     publications {
         register<MavenPublication>("release") {
-            artifactId = "biber-android"
+            artifactId = "biberdroid"
             afterEvaluate { from(components["release"]) }
             pom {
-                name.set("biber for Android")
+                name.set("biberdroid")
                 description.set(
                     "biber 2.21, the bibliography processor for biblatex 3.21, built for Android " +
                         "(arm64-v8a, API 26+) with Perl 5.44 and the CPAN modules it needs, " +
@@ -188,7 +188,7 @@ publishing {
                         comments.set(
                             "This project's code. The bundled biber, Perl, CPAN modules, libxml2, zlib " +
                                 "and libiconv keep their own licences, listed in " +
-                                "assets/biber-android/NOTICES.txt in the AAR.",
+                                "assets/biberdroid/NOTICES.txt in the AAR.",
                         )
                     }
                 }
@@ -202,7 +202,7 @@ publishing {
                 scm {
                     url.set(repoUrl)
                     connection.set("scm:git:$repoUrl.git")
-                    developerConnection.set("scm:git:ssh://git@github.com/LavishSonbhurra/biber-android.git")
+                    developerConnection.set("scm:git:ssh://git@github.com/LavishSonbhurra/biberdroid.git")
                 }
             }
         }

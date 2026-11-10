@@ -49,10 +49,10 @@ S=$B/scripts
 DL=$W/dl/pinned
 H=$W/rootfs/data/data/com.termux/files/home
 # Release name used in dist/ file names, e.g. 2.21-1 for the tag v2.21-1.
-VERSION=${BIBER_ANDROID_VERSION:-2.21-dev}
+VERSION=${BIBERDROID_VERSION:-2.21-dev}
 # Copies of every pinned download, kept as assets of one release of this
 # repository, for when an upstream URL stops working (Termux removes old .debs).
-MIRROR=${BIBER_MIRROR:-https://github.com/LavishSonbhurra/biber-android/releases/download/pinned-downloads}
+MIRROR=${BIBER_MIRROR:-https://github.com/LavishSonbhurra/biberdroid/releases/download/pinned-downloads}
 steps=${*:-fetch rootfs packages cpan biber launcher package verify dist}
 
 check() { echo "$1  $2" | sha256sum -c --quiet - || { echo "checksum mismatch: $2" >&2; rm -f "$2"; return 1; }; }
@@ -129,7 +129,7 @@ package() {
   sudo python3 -I $S/package.py $W/rootfs $W/out
   sudo python3 -I $S/licenses.py $W/rootfs $W/out $DL/cpan
   sudo chown -R "$(id -u):$(id -g)" $W/out
-  BIBER_ANDROID_VERSION=$VERSION python3 -I $S/notices.py $W/out $DL/cpan
+  BIBERDROID_VERSION=$VERSION python3 -I $S/notices.py $W/out $DL/cpan
   python3 -I $S/check-elf.py $W/out/jniLibs/arm64-v8a
   # The Perl tree as an app unpacks it, and its SHA-256 (the tree's version marker).
   python3 -I $S/archive.py $W/out/assets/biber $W/out/perl-tree.tar.xz
@@ -145,7 +145,7 @@ verify() {
 }
 
 dist() {
-  local D=$W/dist P=biber-android-$VERSION
+  local D=$W/dist P=biberdroid-$VERSION
   rm -rf $D; mkdir -p $D
   (cd $W/out && tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner -czf $D/$P-android-arm64.tar.gz \
      jniLibs assets manifest.tsv COMPONENTS.tsv FILES.tsv NOTICES.txt)

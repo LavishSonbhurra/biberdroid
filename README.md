@@ -1,11 +1,11 @@
-# biber-android
+# biberdroid
 
-[![build](https://github.com/LavishSonbhurra/biber-android/actions/workflows/build.yml/badge.svg)](https://github.com/LavishSonbhurra/biber-android/actions/workflows/build.yml)
-[![release](https://img.shields.io/github/v/release/LavishSonbhurra/biber-android)](https://github.com/LavishSonbhurra/biber-android/releases/latest)
-[![license](https://img.shields.io/github/license/LavishSonbhurra/biber-android)](LICENSE)
+[![build](https://github.com/LavishSonbhurra/biberdroid/actions/workflows/build.yml/badge.svg)](https://github.com/LavishSonbhurra/biberdroid/actions/workflows/build.yml)
+[![release](https://img.shields.io/github/v/release/LavishSonbhurra/biberdroid)](https://github.com/LavishSonbhurra/biberdroid/releases/latest)
+[![license](https://img.shields.io/github/license/LavishSonbhurra/biberdroid)](LICENSE)
 
-[biber](https://github.com/plk/biber), the bibliography processor behind biblatex, built to run
-inside an Android app, with no Termux installed on the device.
+biberdroid packages [biber](https://github.com/plk/biber), the bibliography processor behind
+biblatex, to run inside an Android app, with no Termux installed on the device.
 
 It was made for an Android LaTeX editor that compiles with Tectonic, and works with any app
 that needs to turn a biblatex `.bcf` file into a `.bbl`.
@@ -24,7 +24,7 @@ that needs to turn a biblatex `.bcf` file into a `.bbl`.
 biber and biblatex must be used in matching versions. biber refuses a `.bcf` file whose format
 it does not know.
 
-| biber-android | biber | biblatex | `.bcf` format |
+| biberdroid | biber | biblatex | `.bcf` format |
 | --- | --- | --- | --- |
 | 2.21-x | 2.21 | 3.21 | 3.11 |
 
@@ -32,7 +32,7 @@ it does not know.
 
 ### Gradle
 
-> **Not on Maven Central yet.** Until it is, download `biber-android-<version>.aar` from [Releases](https://github.com/LavishSonbhurra/biber-android/releases) into `app/libs` and use the `files(...)` dependency below.
+> **Not on Maven Central yet.** Until it is, download `biberdroid-<version>.aar` from [Releases](https://github.com/LavishSonbhurra/biberdroid/releases) into `app/libs` and use the `files(...)` dependency below.
 
 ```kotlin
 // build.gradle.kts of the app
@@ -56,8 +56,8 @@ android {
 
 dependencies {
     // The AAR from Releases, and its one dependency. Once the library is on Maven Central,
-    // use implementation("io.github.lavishsonbhurra:biber-android:2.21-1") instead.
-    implementation(files("libs/biber-android-2.21-1.aar"))
+    // use implementation("io.github.lavishsonbhurra:biberdroid:2.21-1") instead.
+    implementation(files("libs/biberdroid-2.21-1.aar"))
     implementation("org.tukaani:xz:1.12")
 }
 ```
@@ -65,7 +65,7 @@ dependencies {
 Then, off the main thread:
 
 ```kotlin
-import io.github.lavishsonbhurra.biber.Biber
+import io.github.lavishsonbhurra.biberdroid.Biber
 
 // workDir holds main.bcf (written by a LaTeX run) and the .bib files it names.
 val result = Biber.run(context, workDir, listOf("main"))
@@ -97,21 +97,21 @@ which Tectonic would otherwise write back into the document's folder. With a cac
 
 ### Without Gradle: the release files
 
-Each [release](https://github.com/LavishSonbhurra/biber-android/releases) has the payload as
+Each [release](https://github.com/LavishSonbhurra/biberdroid/releases) has the payload as
 plain files:
 
 | File | Contents |
 | --- | --- |
-| `biber-android-<version>-jniLibs-arm64-v8a.tar.gz` | `jniLibs/arm64-v8a/*.so` |
-| `biber-android-<version>-perl-tree.tar.xz` | the Perl tree (`bin/biber`, `lib/`) |
-| `biber-android-<version>-android-arm64.tar.gz` | both, unpacked, with file lists and notices |
-| `biber-android-<version>.aar` | the Android library |
+| `biberdroid-<version>-jniLibs-arm64-v8a.tar.gz` | `jniLibs/arm64-v8a/*.so` |
+| `biberdroid-<version>-perl-tree.tar.xz` | the Perl tree (`bin/biber`, `lib/`) |
+| `biberdroid-<version>-android-arm64.tar.gz` | both, unpacked, with file lists and notices |
+| `biberdroid-<version>.aar` | the Android library |
 | `NOTICES.txt`, `COMPONENTS.tsv` | licences and sources of every component |
-| `biber-android-<version>-sources.tar` | the complete source of the payload |
+| `biberdroid-<version>-sources.tar` | the complete source of the payload |
 | `SHA256SUMS` | checksums of all of the above |
 
 ```sh
-tar -xzf biber-android-2.21-1-jniLibs-arm64-v8a.tar.gz -C app/src/main
+tar -xzf biberdroid-2.21-1-jniLibs-arm64-v8a.tar.gz -C app/src/main
 ```
 
 Unpack the Perl tree to a folder of the app's own at run time, then start
@@ -144,7 +144,7 @@ A GitHub `ubuntu-24.04-arm` runner should work.
 ```sh
 ./build.sh                 # payload in work/out, release files in work/dist
 cd android
-./gradlew :biber:assembleRelease
+./gradlew :biberdroid:assembleRelease
 ```
 
 `./build.sh` also checks the result in a minimal Android-like root: the `.bbl` files must be

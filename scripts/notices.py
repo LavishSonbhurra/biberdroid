@@ -19,12 +19,12 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 B = os.path.dirname(HERE)
 TARBALLS = sys.argv[2] if len(sys.argv) > 2 else os.path.join(B, "work/dl/pinned/cpan")
 LIC = os.path.join(B, "licenses")
-# The release this payload belongs to (build.sh passes BIBER_ANDROID_VERSION); a
+# The release this payload belongs to (build.sh passes BIBERDROID_VERSION); a
 # development build names the pattern instead.
-_VERSION = os.environ.get("BIBER_ANDROID_VERSION", "")
+_VERSION = os.environ.get("BIBERDROID_VERSION", "")
 _V = _VERSION if _VERSION and not _VERSION.endswith("-dev") else "<version>"
-SOURCES_URL = ("https://github.com/LavishSonbhurra/biber-android/releases/download/"
-               f"v{_V}/biber-android-{_V}-sources.tar")
+SOURCES_URL = ("https://github.com/LavishSonbhurra/biberdroid/releases/download/"
+               f"v{_V}/biberdroid-{_V}-sources.tar")
 
 # Licence as licenses.py writes it -> (what this distribution uses, text file or None).
 CHOSEN = {
@@ -89,8 +89,8 @@ for name, version, licence, source in rows:
     for t in texts:
         if t not in used:
             used.append(t)
-    if name == "biber-android":
-        lines.append(f"- biber-android, the launcher and module loader written for this build: {terms}. Source: {source}")
+    if name == "biberdroid":
+        lines.append(f"- biberdroid, the launcher and module loader written for this build: {terms}. Source: {source}")
     else:
         lines.append(f"- {name} {version}: {terms}. Source: {source}")
 

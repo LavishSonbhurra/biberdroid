@@ -1,4 +1,4 @@
-package io.github.lavishsonbhurra.biber
+package io.github.lavishsonbhurra.biberdroid
 
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream

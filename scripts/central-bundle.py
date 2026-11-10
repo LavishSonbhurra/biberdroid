@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Packs a signed Maven repository directory into a Central Portal bundle.
 
-Takes the directory that `./gradlew :biber:publishReleasePublicationToStagingRepository`
+Takes the directory that `./gradlew :biberdroid:publishReleasePublicationToStagingRepository`
 wrote with a signing key set (android/build/central-staging) and zips it with the same
 layout. Gradle's maven-metadata files are left out, since Central makes its own. Every
 artifact must have its .asc signature and correct .md5 and .sha1 files, or nothing is

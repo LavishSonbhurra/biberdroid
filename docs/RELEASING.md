@@ -21,7 +21,7 @@ In this order:
 4. Set up Maven Central (below), then tag the first release.
 5. Once the first version is published on Maven Central, edit the README: remove the "Not on
    Maven Central yet" note and replace the two `files(...)` and `xz` lines with
-   `implementation("io.github.lavishsonbhurra:biber-android:<version>")`.
+   `implementation("io.github.lavishsonbhurra:biberdroid:<version>")`.
 
 ## Versions
 
@@ -34,7 +34,7 @@ are `2.21-dev`.
 Push a tag:
 
 ```sh
-git tag -a v2.21-1 -m "biber-android 2.21-1"
+git tag -a v2.21-1 -m "biberdroid 2.21-1"
 git push origin v2.21-1
 ```
 
@@ -43,17 +43,17 @@ publishes a GitHub release with these files:
 
 | File | Contents |
 | --- | --- |
-| `biber-android-<version>-android-arm64.tar.gz` | `jniLibs/`, `assets/biber/`, `manifest.tsv`, `COMPONENTS.tsv`, `FILES.tsv`, `NOTICES.txt` |
-| `biber-android-<version>-jniLibs-arm64-v8a.tar.gz` | `jniLibs/arm64-v8a/*.so` |
-| `biber-android-<version>-perl-tree.tar.xz` | The Perl tree, as the library unpacks it |
-| `biber-android-<version>.aar` | The Android library |
-| `biber-android-<version>-sources.tar` | The complete source of the payload (`scripts/sources.sh`) |
+| `biberdroid-<version>-android-arm64.tar.gz` | `jniLibs/`, `assets/biber/`, `manifest.tsv`, `COMPONENTS.tsv`, `FILES.tsv`, `NOTICES.txt` |
+| `biberdroid-<version>-jniLibs-arm64-v8a.tar.gz` | `jniLibs/arm64-v8a/*.so` |
+| `biberdroid-<version>-perl-tree.tar.xz` | The Perl tree, as the library unpacks it |
+| `biberdroid-<version>.aar` | The Android library |
+| `biberdroid-<version>-sources.tar` | The complete source of the payload (`scripts/sources.sh`) |
 | `NOTICES.txt`, `COMPONENTS.tsv` | Licences and sources of every component |
 | `SHA256SUMS` | Checksums of the files above |
 
 ## Maven Central
 
-Two jobs handle Maven Central, `io.github.lavishsonbhurra:biber-android:<version>`. Both run
+Two jobs handle Maven Central, `io.github.lavishsonbhurra:biberdroid:<version>`. Both run
 only on a tag and only when all four secrets below are set; otherwise they note that they
 skipped. `sign` runs before the GitHub release is created: it builds the publication again
 with Gradle signing, checks that its AAR is byte-identical to the one going into the release,
@@ -78,7 +78,7 @@ Locally, the same publication is made with:
 ```sh
 cd android
 SIGNING_KEY="$(gpg --armor --export-secret-keys <id>)" SIGNING_PASSPHRASE=... \
-  ./gradlew :biber:publishReleasePublicationToStagingRepository
+  ./gradlew :biberdroid:publishReleasePublicationToStagingRepository
 python3 -I ../scripts/central-bundle.py --repo build/central-staging --out central-bundle.zip
 ```
 
@@ -107,9 +107,9 @@ the payload, can meet the licences of its components:
 
 - **Notices.** `NOTICES.txt` lists every component with its version, licence and source, and
   holds every licence text once. It is a release file, it is inside the payload archive, and
-  the AAR carries it as `assets/biber-android/NOTICES.txt` (`Biber.notices(context)`), so an
+  the AAR carries it as `assets/biberdroid/NOTICES.txt` (`Biber.notices(context)`), so an
   app can show it.
-- **Source.** `biber-android-<version>-sources.tar`, attached to the same release as the
+- **Source.** `biberdroid-<version>-sources.tar`, attached to the same release as the
   binaries, holds biber and every CPAN distribution as downloaded, the upstream sources of
   Perl (with perl-cross), libxml2, zlib and libiconv, Termux's recipes and patches for them
   at the pinned commit, and this repository. This is the source offered from the same place

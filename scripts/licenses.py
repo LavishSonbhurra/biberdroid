@@ -43,7 +43,7 @@ FIXED = {
     "zlib": ("1.4 (Termux zlib 1.4)", "Zlib", "https://zlib.net/ + " + TERMUX_PKGS + "zlib"),
     "libiconv": ("1.19.1 (Termux libiconv 1.19.1)", "LGPL-2.1-or-later",
                  "https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.19.1.tar.gz + " + TERMUX_PKGS + "libiconv"),
-    "biber-android": ("-", "Artistic-2.0", "https://github.com/LavishSonbhurra/biber-android (src/biber-launcher.c, src/BiberNative.pm)"),
+    "biberdroid": ("-", "Artistic-2.0", "https://github.com/LavishSonbhurra/biberdroid (src/biber-launcher.c, src/BiberNative.pm)"),
 }
 
 # dist -> (version, licence, url), read from each pinned tarball's META file.
@@ -112,7 +112,7 @@ for line in open(os.path.join(OUT, "manifest.tsv")):
     elif origin.startswith("termux:"):
         comp = origin.split(":", 1)[1]
     elif origin == "ours":
-        comp = "biber-android"
+        comp = "biberdroid"
     elif origin == "cpan":
         if kind == "asset":
             rel = name[len("lib/"):]

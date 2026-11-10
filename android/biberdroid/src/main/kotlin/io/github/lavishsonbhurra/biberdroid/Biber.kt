@@ -1,4 +1,4 @@
-package io.github.lavishsonbhurra.biber
+package io.github.lavishsonbhurra.biberdroid
 
 import android.content.Context
 import android.system.ErrnoException
@@ -33,7 +33,7 @@ public object Biber {
     public const val TECTONIC_TOOL: String = "tectonic-biber"
 
     private const val LAUNCHER = "libbiber.so"
-    private const val ASSETS = "biber-android"
+    private const val ASSETS = "biberdroid"
     private const val TREE = "$ASSETS/perl-tree.tar.xz"
     private const val TREE_VERSION = "$ASSETS/perl-tree.version"
     private const val NOTICES = "$ASSETS/NOTICES.txt"

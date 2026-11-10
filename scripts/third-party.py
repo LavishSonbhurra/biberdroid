@@ -15,8 +15,8 @@ The payload (the files in `jniLibs/arm64-v8a` and the Perl tree) is made of the 
 below, generated from the build's `COMPONENTS.tsv`. Each release also carries:
 
 - `NOTICES.txt`: this list with the full licence texts, for an app's licences screen.
-  The AAR holds the same file as `assets/biber-android/NOTICES.txt`.
-- `biber-android-<version>-sources.tar`: the complete source of everything listed here.
+  The AAR holds the same file as `assets/biberdroid/NOTICES.txt`.
+- `biberdroid-<version>-sources.tar`: the complete source of everything listed here.
 - `COMPONENTS.tsv` and, inside the payload archive, `FILES.tsv`, which maps every shipped
   file to its component.
 
