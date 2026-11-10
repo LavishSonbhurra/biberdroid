@@ -1,0 +1,171 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.3 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{none/global//global/global/global}
+    \entry{knuth84}{book}{}{}
+      \name{author}{1}{}{%
+        {{hash=ec08e6f01da5f3814f28a70c89c64656}{%
+           family={Knuth},
+           familyi={K\bibinitperiod},
+           given={Donald\bibnamedelima E.},
+           giveni={D\bibinitperiod\bibinitdelim E\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Reading, Mass.}%
+      }
+      \list{publisher}{1}{%
+        {Addison-Wesley}%
+      }
+      \strng{namehash}{ec08e6f01da5f3814f28a70c89c64656}
+      \strng{fullhash}{ec08e6f01da5f3814f28a70c89c64656}
+      \strng{fullhashraw}{ec08e6f01da5f3814f28a70c89c64656}
+      \strng{bibnamehash}{ec08e6f01da5f3814f28a70c89c64656}
+      \strng{authorbibnamehash}{ec08e6f01da5f3814f28a70c89c64656}
+      \strng{authornamehash}{ec08e6f01da5f3814f28a70c89c64656}
+      \strng{authorfullhash}{ec08e6f01da5f3814f28a70c89c64656}
+      \strng{authorfullhashraw}{ec08e6f01da5f3814f28a70c89c64656}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{isbn}{0-201-13447-0}
+      \field{title}{The {\TeX}book}
+      \field{year}{1984}
+      \field{dateera}{ce}
+    \endentry
+    \entry{smith2020a}{article}{}{}
+      \name{author}{3}{}{%
+        {{hash=5d0ddda3a367ceb26fbaeca02e391c22}{%
+           family={Smith},
+           familyi={S\bibinitperiod},
+           given={John},
+           giveni={J\bibinitperiod}}}%
+        {{hash=d6cfb2b8c4b3f9440ec4642438129367}{%
+           family={Doe},
+           familyi={D\bibinitperiod},
+           given={Jane},
+           giveni={J\bibinitperiod}}}%
+        {{hash=31ee1db9c67b2817b746426d40e4c754}{%
+           family={Khan},
+           familyi={K\bibinitperiod},
+           given={Ali},
+           giveni={A\bibinitperiod}}}%
+      }
+      \strng{namehash}{2d05b2cf738af6ea5fe08887b681d257}
+      \strng{fullhash}{071664ac4c9da9cb152f414703eb90ab}
+      \strng{fullhashraw}{071664ac4c9da9cb152f414703eb90ab}
+      \strng{bibnamehash}{071664ac4c9da9cb152f414703eb90ab}
+      \strng{authorbibnamehash}{071664ac4c9da9cb152f414703eb90ab}
+      \strng{authornamehash}{2d05b2cf738af6ea5fe08887b681d257}
+      \strng{authorfullhash}{071664ac4c9da9cb152f414703eb90ab}
+      \strng{authorfullhashraw}{071664ac4c9da9cb152f414703eb90ab}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Journal of Widgets}
+      \field{title}{First Results on Widgets}
+      \field{volume}{4}
+      \field{year}{2020}
+      \field{dateera}{ce}
+      \field{pages}{1\bibrangedash 10}
+      \range{pages}{10}
+      \verb{doi}
+      \verb 10.1000/jw.2020.1
+      \endverb
+    \endentry
+    \entry{doe2019}{inproceedings}{}{}
+      \name{author}{1}{}{%
+        {{hash=d6cfb2b8c4b3f9440ec4642438129367}{%
+           family={Doe},
+           familyi={D\bibinitperiod},
+           given={Jane},
+           giveni={J\bibinitperiod}}}%
+      }
+      \name{editor}{2}{}{%
+        {{hash=f2dbd596d28e5a7f01bc4cfb62d47076}{%
+           family={Editor},
+           familyi={E\bibinitperiod},
+           given={Peter},
+           giveni={P\bibinitperiod}}}%
+        {{hash=260df1a6f3b2dcb95925877419d827b6}{%
+           family={Editrix},
+           familyi={E\bibinitperiod},
+           given={Paula},
+           giveni={P\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{d6cfb2b8c4b3f9440ec4642438129367}
+      \strng{fullhash}{d6cfb2b8c4b3f9440ec4642438129367}
+      \strng{fullhashraw}{d6cfb2b8c4b3f9440ec4642438129367}
+      \strng{bibnamehash}{d6cfb2b8c4b3f9440ec4642438129367}
+      \strng{authorbibnamehash}{d6cfb2b8c4b3f9440ec4642438129367}
+      \strng{authornamehash}{d6cfb2b8c4b3f9440ec4642438129367}
+      \strng{authorfullhash}{d6cfb2b8c4b3f9440ec4642438129367}
+      \strng{authorfullhashraw}{d6cfb2b8c4b3f9440ec4642438129367}
+      \strng{editorbibnamehash}{05ce94e26eca93aa4f95b14950de8d6a}
+      \strng{editornamehash}{05ce94e26eca93aa4f95b14950de8d6a}
+      \strng{editorfullhash}{05ce94e26eca93aa4f95b14950de8d6a}
+      \strng{editorfullhashraw}{05ce94e26eca93aa4f95b14950de8d6a}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Proceedings of the Gadget Conference}
+      \field{title}{Gadgets and Gizmos}
+      \field{year}{2019}
+      \field{dateera}{ce}
+      \field{pages}{33\bibrangedash 40}
+      \range{pages}{8}
+    \endentry
+    \entry{nguyen2021}{thesis}{}{}
+      \name{author}{1}{}{%
+        {{hash=d49d875bc815e19e1456af0f84947334}{%
+           family={An},
+           familyi={A\bibinitperiod},
+           given={Nguyễn\bibnamedelima Văn},
+           giveni={N\bibinitperiod\bibinitdelim V\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {Đại học Quốc gia}%
+      }
+      \strng{namehash}{d49d875bc815e19e1456af0f84947334}
+      \strng{fullhash}{d49d875bc815e19e1456af0f84947334}
+      \strng{fullhashraw}{d49d875bc815e19e1456af0f84947334}
+      \strng{bibnamehash}{d49d875bc815e19e1456af0f84947334}
+      \strng{authorbibnamehash}{d49d875bc815e19e1456af0f84947334}
+      \strng{authornamehash}{d49d875bc815e19e1456af0f84947334}
+      \strng{authorfullhash}{d49d875bc815e19e1456af0f84947334}
+      \strng{authorfullhashraw}{d49d875bc815e19e1456af0f84947334}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Phân tích dữ liệu}
+      \field{type}{phdthesis}
+      \field{year}{2021}
+      \field{dateera}{ce}
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

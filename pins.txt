@@ -1,0 +1,24 @@
+# Every download the build uses: sha256  url  saved-as (under work/dl/pinned).
+# CPAN tarballs are in scripts/cpan-pins.sha256 (cpan.metacpan.org keeps every
+# release). Termux keeps only the newest build of a package, so the .deb URLs
+# stop working after its next version bump; build.sh then falls back to the
+# copies kept as assets of this repository's "pinned-downloads" release
+# (scripts/mirror-upload.sh puts them there).
+
+# termux-docker:aarch64 root filesystem layer (manifest digest
+# sha256:d0415618cbbf8433a23cf5bddb198eeb62bcba1243ccfc1d015b2f464bd609d5,
+# built 2026-11-08). Its /system is Android 9 (API 28) bionic, used only to run
+# the build and the checks; nothing from it ships.
+0cceb4b43c7e410be1d4ed1facb6036d422de5033c0808f1b88b0d626f27b05d  docker://termux/termux-docker@sha256:0cceb4b43c7e410be1d4ed1facb6036d422de5033c0808f1b88b0d626f27b05d  termux-docker-layer.tar.gz
+
+# biber 2.21 source (the GitHub tag; matches biblatex 3.21, bcf format 3.11)
+2652cf3ae0abff5fb233aa77f18e70014cc2c70b94a8693c099a3cad9bbb4b20  https://codeload.github.com/plk/biber/tar.gz/refs/tags/v2.21  biber-2.21.tar.gz
+
+# cpanm (build tool only): its fatpacked bin/cpanm
+b9ffb88e62a06aa91bd7d5a28ef6bdbb942608aea90e3969aa29b33640035214  https://cpan.metacpan.org/authors/id/M/MI/MIYAGAWA/App-cpanminus-1.7049.tar.gz  App-cpanminus-1.7049.tar.gz
+
+# Termux packages whose files ship (perl, libxml2 and libxml2's deps)
+d41854d91b330ac94f181c06c83531da66f274b314a7271a1a8a951149e998b6  https://packages-cf.termux.dev/apt/termux-main/pool/main/p/perl/perl_5.44.0-1_aarch64.deb  perl_5.44.0-1_aarch64.deb
+d315861bbcf716cfb088f53cddab9fb6a96430cc66769f79774cc69c2f53bcff  https://packages-cf.termux.dev/apt/termux-main/pool/main/libx/libxml2/libxml2_2.15.4-1_aarch64.deb  libxml2_2.15.4-1_aarch64.deb
+e3027565ae50bcd8ba5113c988b589754ae192c9cc3e6afbe3e4ed7c06b2598e  https://packages-cf.termux.dev/apt/termux-main/pool/main/z/zlib/zlib_1.4_aarch64.deb  zlib_1.4_aarch64.deb
+a1c6323eff4f660e16ae6f5832356444b3269c19a4f61146355a49e7c4be5ed1  https://packages-cf.termux.dev/apt/termux-main/pool/main/libi/libiconv/libiconv_1.19.1_aarch64.deb  libiconv_1.19.1_aarch64.deb

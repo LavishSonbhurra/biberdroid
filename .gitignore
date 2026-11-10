@@ -1,0 +1,9 @@
+# Downloads, the build root filesystem and build output (BIBER_WORK)
+/work/
+__pycache__/
+
+# Gradle (android/)
+.gradle/
+.kotlin/
+build/
+local.properties

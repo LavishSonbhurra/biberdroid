@@ -1,0 +1,15 @@
+# Upstream source of the Termux packages whose files ship, for the release's
+# sources file (scripts/sources.sh). Not used by the build itself.
+# sha256  url  saved-as (under work/dl/sources). The checksums are the ones in
+# Termux's own recipes at the commit below.
+
+505cf43912e9480495c344c70260452e32aa2a73c546a026b3f100053b23ce91  https://www.cpan.org/src/5.0/perl-5.44.0.tar.xz  perl-5.44.0.tar.xz
+24cccde966c79cec3064c661df519a8d9f710b0b1bb3e2f44c30c1c29e7afbc5  https://github.com/arsv/perl-cross/archive/refs/tags/1.6.5.tar.gz  perl-cross-1.6.5.tar.gz
+98087fd181d9070724f3fbc65c7377db03038eb92bd882374daff44940138821  https://download.gnome.org/sources/libxml2/2.15/libxml2-2.15.4.tar.xz  libxml2-2.15.4.tar.xz
+4f11c512053d7bab8d9e9b89bde3575add3e4c50a383b42ef6cb837035fc5a7c  https://github.com/madler/zlib/releases/download/v1.4/zlib-1.4.tar.xz  zlib-1.4.tar.xz
+9a06844846d664d7122161700c10a64480d7c7bcead3091925a785b38c91edab  https://ftp.gnu.org/gnu/libiconv/libiconv-1.19.1.tar.gz  libiconv-1.19.1.tar.gz
+
+# Termux's recipes (build.sh and patches) for perl 5.44.0-1, libxml2 2.15.4-1,
+# zlib 1.4 and libiconv 1.19.1, and its build scripts, from this commit of
+# https://github.com/termux/termux-packages
+termux-packages 1cdec5c9cead4b5c3841d1df93d3007a99360544  packages/perl packages/libxml2 packages/zlib packages/libiconv scripts

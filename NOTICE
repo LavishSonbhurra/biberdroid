@@ -1,0 +1,29 @@
+biber-android
+Copyright 2026 Lavish Sonbhurra
+
+This repository contains build scripts, a small launcher and Perl module loader,
+an Android library and tests, licensed under the Artistic License 2.0 (see LICENSE).
+
+The files it builds and ships are other people's work:
+
+* biber (https://github.com/plk/biber), by François Charette and Philip Kime,
+  under the Artistic License 2.0.
+
+* Perl (https://www.perl.org) and the CPAN distributions biber depends on, each
+  under its own licence, mostly "the same terms as Perl itself" (the Artistic
+  License or the GNU GPL).
+
+* Termux's builds of Perl, libxml2, zlib and libiconv
+  (https://github.com/termux/termux-packages), under the licences of those
+  projects: Perl's terms, MIT, the zlib licence and the GNU LGPL 2.1 or later.
+
+None of their source is changed. They are downloaded at build time, checked
+against the SHA-256 sums in pins.txt and scripts/cpan-pins.sha256, and are not
+part of this repository. THIRD_PARTY.md lists every component with its version,
+licence and source. Each release carries the full notices (NOTICES.txt) and the
+complete source of everything it ships (biber-android-<version>-sources.tar).
+
+The test fixtures in tests/fixtures were made with biblatex 3.21 and the official
+biber 2.21 binary.
+
+This project is not affiliated with the biber, biblatex, Perl or Termux projects.

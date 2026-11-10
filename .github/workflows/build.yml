@@ -1,0 +1,262 @@
+# Builds the biber payload on GitHub's arm64 runner and checks it in an Android-like root,
+# builds and tests the AAR, and on a tag v* publishes a GitHub release. With Maven Central
+# secrets set, a tag also uploads the AAR to the Central Portal, where it waits for a
+# manual Publish.
+#
+# Not run yet: this workflow was written before the repository was on GitHub, from the
+# commands that build and check the payload locally (docs/BUILDING.md). Expect fixes on
+# its first run.
+#
+# Jobs
+#   payload  ubuntu-24.04-arm. ./build.sh: Termux's root filesystem entered with sudo
+#            chroot (no emulator: the arm64 kernel runs Android's bionic binaries), 112
+#            CPAN dists, biber and its 1264 tests, packaging, then the checks in an
+#            Android-like root. 8 minutes on a 2-core VM with the downloads cached.
+#   library  ubuntu-24.04 (x86_64, because Android's aapt2 is x86_64-only). The AAR from
+#            the payload, and its unit tests.
+#   release  tags only. A GitHub release with the payload, the AAR, notices, the complete
+#            sources and SHA256SUMS.
+#   central  tags only, and only with secrets. Signs the same AAR with Gradle and uploads
+#            it to the Central Portal as USER_MANAGED: nothing is public until someone
+#            presses Publish at central.sonatype.com.
+#
+# Secrets, in the maven-central environment (all four, or the job does nothing):
+#   CENTRAL_USERNAME, CENTRAL_PASSWORD   a Central Portal user token
+#   SIGNING_KEY, SIGNING_PASSPHRASE      the release key, ASCII armored, and its passphrase
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # v2.21-1 -> 2.21-1; anything else builds 2.21-dev.
+  BIBER_ANDROID_VERSION: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'v2.21-dev' }}
+
+jobs:
+  payload:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Version
+        run: echo "BIBER_ANDROID_VERSION=${BIBER_ANDROID_VERSION#v}" >> "$GITHUB_ENV"
+
+      - name: Install host tools
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends patchelf
+
+      # Only checksummed downloads go in the cache. build.sh checks every file again.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: work/dl
+          key: dl-${{ hashFiles('pins.txt', 'scripts/cpan-pins.sha256', 'source-pins.txt') }}
+
+      - name: Build
+        run: ./build.sh fetch rootfs packages cpan biber launcher package
+
+      - name: Check in an Android-like root
+        run: ./build.sh verify
+
+      - name: THIRD_PARTY.md matches the build
+        run: |
+          python3 -I scripts/third-party.py work/out/COMPONENTS.tsv > "$RUNNER_TEMP/THIRD_PARTY.md"
+          diff -u THIRD_PARTY.md "$RUNNER_TEMP/THIRD_PARTY.md"
+
+      - name: Sources
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: ./build.sh sources
+
+      - name: Release files
+        run: ./build.sh dist
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: payload
+          path: |
+            work/out/jniLibs
+            work/out/perl-tree.tar.xz
+            work/out/NOTICES.txt
+          if-no-files-found: error
+          retention-days: 14
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dist
+          path: work/dist
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Unmount the build roots
+        if: always()
+        run: ./build.sh umount
+
+  # ---------------------------------------------------------------------------------------
+  library:
+    needs: payload
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Version
+        run: echo "BIBER_ANDROID_VERSION=${BIBER_ANDROID_VERSION#v}" >> "$GITHUB_ENV"
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: payload
+          path: work/out
+
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+        with:
+          packages: "platforms;android-36 build-tools;35.0.0"
+          log-accepted-android-sdk-licenses: false
+
+      - uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
+
+      - name: Build and test the AAR
+        working-directory: android
+        run: |
+          ./gradlew --no-daemon -PbiberAndroidVersion="$BIBER_ANDROID_VERSION" \
+            :biber:testReleaseUnitTest :biber:assembleRelease
+          mkdir -p ../aar
+          cp biber/build/outputs/aar/biber-release.aar "../aar/biber-android-$BIBER_ANDROID_VERSION.aar"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: aar
+          path: aar
+          if-no-files-found: error
+          retention-days: 14
+
+  # ---------------------------------------------------------------------------------------
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [payload, library]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - name: Version
+        run: echo "BIBER_ANDROID_VERSION=${BIBER_ANDROID_VERSION#v}" >> "$GITHUB_ENV"
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: dist
+          path: dist
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: aar
+          path: dist
+
+      - name: Checksums
+        run: cd dist && sha256sum --check --strict SHA256SUMS && sha256sum -- *.aar >> SHA256SUMS && cat SHA256SUMS
+
+      - name: Publish the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          {
+            echo "biber 2.21 for Android (arm64-v8a, API 26 and later), for biblatex 3.21."
+            echo
+            echo "Use the AAR from Maven Central (\`io.github.lavishsonbhurra:biber-android:$BIBER_ANDROID_VERSION\`, once published there) or the files below. The sources file holds the complete source of everything in the payload."
+            echo
+            echo '```'
+            cat dist/SHA256SUMS
+            echo '```'
+          } > notes.md
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "biber-android $BIBER_ANDROID_VERSION" \
+            --notes-file notes.md --verify-tag dist/*
+
+  # ---------------------------------------------------------------------------------------
+  central:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [payload, library, release]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    environment: maven-central
+    env:
+      HAVE_SECRETS: ${{ secrets.CENTRAL_USERNAME != '' && secrets.CENTRAL_PASSWORD != '' && secrets.SIGNING_KEY != '' && secrets.SIGNING_PASSPHRASE != '' }}
+    steps:
+      - name: Secrets
+        run: |
+          echo "BIBER_ANDROID_VERSION=${BIBER_ANDROID_VERSION#v}" >> "$GITHUB_ENV"
+          if [ "$HAVE_SECRETS" != true ]; then
+            echo "::notice::Maven Central secrets are not set; skipping the upload."
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: env.HAVE_SECRETS == 'true'
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        if: env.HAVE_SECRETS == 'true'
+        with:
+          name: payload
+          path: work/out
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        if: env.HAVE_SECRETS == 'true'
+        with:
+          name: aar
+          path: aar
+
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        if: env.HAVE_SECRETS == 'true'
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+        if: env.HAVE_SECRETS == 'true'
+        with:
+          packages: "platforms;android-36 build-tools;35.0.0"
+          log-accepted-android-sdk-licenses: false
+
+      - uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
+        if: env.HAVE_SECRETS == 'true'
+
+      - name: Sign into a Maven repository
+        if: env.HAVE_SECRETS == 'true'
+        working-directory: android
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          SIGNING_PASSPHRASE: ${{ secrets.SIGNING_PASSPHRASE }}
+        run: |
+          ./gradlew --no-daemon -PbiberAndroidVersion="$BIBER_ANDROID_VERSION" \
+            :biber:publishReleasePublicationToStagingRepository
+          # What goes to Central must be the AAR that was tested and released.
+          cmp build/central-staging/io/github/lavishsonbhurra/biber-android/"$BIBER_ANDROID_VERSION"/biber-android-"$BIBER_ANDROID_VERSION".aar \
+            ../aar/biber-android-"$BIBER_ANDROID_VERSION".aar
+
+      - name: Upload to the Central Portal
+        if: env.HAVE_SECRETS == 'true'
+        env:
+          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+        run: |
+          python3 -I scripts/central-bundle.py --repo android/build/central-staging --out central-bundle.zip
+          python3 -I scripts/central-upload.py --bundle central-bundle.zip --name "biber-android $BIBER_ANDROID_VERSION"

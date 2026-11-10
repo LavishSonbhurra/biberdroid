@@ -1,0 +1,341 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.3 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{apa/apasortcite//global/global/global}
+    \entry{apa4}{online}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=b29c48e2adfa8813d0821cd69be08ecb}{%
+           family={{American Psychological Association}},
+           familyi={A\bibinitperiod}}}%
+      }
+      \strng{namehash}{b29c48e2adfa8813d0821cd69be08ecb}
+      \strng{fullhash}{b29c48e2adfa8813d0821cd69be08ecb}
+      \strng{fullhashraw}{b29c48e2adfa8813d0821cd69be08ecb}
+      \strng{bibnamehash}{b29c48e2adfa8813d0821cd69be08ecb}
+      \strng{authorbibnamehash}{b29c48e2adfa8813d0821cd69be08ecb}
+      \strng{authornamehash}{b29c48e2adfa8813d0821cd69be08ecb}
+      \strng{authorfullhash}{b29c48e2adfa8813d0821cd69be08ecb}
+      \strng{authorfullhashraw}{b29c48e2adfa8813d0821cd69be08ecb}
+      \field{sortinit}{A}
+      \field{sortinithash}{2f401846e2029bad6b3ecc16d50031e2}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{month}{10}
+      \field{title}{Publication manual}
+      \field{year}{2020}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb https://apastyle.apa.org
+      \endverb
+      \verb{url}
+      \verb https://apastyle.apa.org
+      \endverb
+    \endentry
+    \entry{apa3}{inbook}{}{}
+      \name{author}{2}{}{%
+        {{un=0,uniquepart=base,hash=9fc01284519d57b1baee139fcf7fabbd}{%
+           family={García},
+           familyi={G\bibinitperiod},
+           given={María},
+           giveni={M\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=08e2574a4e456a099f684aa077411a1a}{%
+           family={Ångström},
+           familyi={Å\bibinitperiod},
+           given={Lars},
+           giveni={L\bibinitperiod},
+           givenun=0}}%
+      }
+      \name{editor}{1}{}{%
+        {{hash=30d10e926c3169d307e7d370169e0532}{%
+           family={Brown},
+           familyi={B\bibinitperiod},
+           given={Ed},
+           giveni={E\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Publisher}%
+      }
+      \strng{namehash}{faa831276f3787a69692ecebaf3762b4}
+      \strng{fullhash}{faa831276f3787a69692ecebaf3762b4}
+      \strng{fullhashraw}{faa831276f3787a69692ecebaf3762b4}
+      \strng{bibnamehash}{faa831276f3787a69692ecebaf3762b4}
+      \strng{authorbibnamehash}{faa831276f3787a69692ecebaf3762b4}
+      \strng{authornamehash}{faa831276f3787a69692ecebaf3762b4}
+      \strng{authorfullhash}{faa831276f3787a69692ecebaf3762b4}
+      \strng{authorfullhashraw}{faa831276f3787a69692ecebaf3762b4}
+      \strng{editorbibnamehash}{30d10e926c3169d307e7d370169e0532}
+      \strng{editornamehash}{30d10e926c3169d307e7d370169e0532}
+      \strng{editorfullhash}{30d10e926c3169d307e7d370169e0532}
+      \strng{editorfullhashraw}{30d10e926c3169d307e7d370169e0532}
+      \field{sortinit}{G}
+      \field{sortinithash}{32d67eca0634bf53703493fb1090a2e8}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Edited book}
+      \field{title}{Chapter title}
+      \field{year}{2018}
+      \field{dateera}{ce}
+      \field{pages}{1\bibrangedash 20}
+      \range{pages}{20}
+    \endentry
+    \entry{apa2}{book}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=380f6af10ab88987b4793f70f5105365}{%
+           family={Smith},
+           familyi={S\bibinitperiod},
+           given={John\bibnamedelima A.},
+           giveni={J\bibinitperiod\bibinitdelim A\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Example Press}%
+      }
+      \strng{namehash}{380f6af10ab88987b4793f70f5105365}
+      \strng{fullhash}{380f6af10ab88987b4793f70f5105365}
+      \strng{fullhashraw}{380f6af10ab88987b4793f70f5105365}
+      \strng{bibnamehash}{380f6af10ab88987b4793f70f5105365}
+      \strng{authorbibnamehash}{380f6af10ab88987b4793f70f5105365}
+      \strng{authornamehash}{380f6af10ab88987b4793f70f5105365}
+      \strng{authorfullhash}{380f6af10ab88987b4793f70f5105365}
+      \strng{authorfullhashraw}{380f6af10ab88987b4793f70f5105365}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{subtitle}{With a subtitle}
+      \field{title}{A book title}
+      \field{year}{2019}
+      \field{dateera}{ce}
+    \endentry
+    \entry{apa1}{article}{}{}
+      \name{author}{2}{}{%
+        {{un=0,uniquepart=base,hash=380f6af10ab88987b4793f70f5105365}{%
+           family={Smith},
+           familyi={S\bibinitperiod},
+           given={John\bibnamedelima A.},
+           giveni={J\bibinitperiod\bibinitdelim A\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=2e78d1c610f14aaa249dc7edd7c39cb1}{%
+           family={Doe},
+           familyi={D\bibinitperiod},
+           given={Jane\bibnamedelima B.},
+           giveni={J\bibinitperiod\bibinitdelim B\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{b7efa5e373adfb005c853d7fdb340663}
+      \strng{fullhash}{b7efa5e373adfb005c853d7fdb340663}
+      \strng{fullhashraw}{b7efa5e373adfb005c853d7fdb340663}
+      \strng{bibnamehash}{b7efa5e373adfb005c853d7fdb340663}
+      \strng{authorbibnamehash}{b7efa5e373adfb005c853d7fdb340663}
+      \strng{authornamehash}{b7efa5e373adfb005c853d7fdb340663}
+      \strng{authorfullhash}{b7efa5e373adfb005c853d7fdb340663}
+      \strng{authorfullhashraw}{b7efa5e373adfb005c853d7fdb340663}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Journal of Examples}
+      \field{number}{3}
+      \field{title}{An article title in sentence case}
+      \field{volume}{12}
+      \field{year}{2019}
+      \field{dateera}{ce}
+      \field{pages}{45\bibrangedash 67}
+      \range{pages}{23}
+      \verb{doi}
+      \verb 10.1234/abcd.5678
+      \endverb
+    \endentry
+  \enddatalist
+  \datalist[entry]{apa/global//global/global/global}
+    \entry{apa4}{online}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=b29c48e2adfa8813d0821cd69be08ecb}{%
+           family={{American Psychological Association}},
+           familyi={A\bibinitperiod}}}%
+      }
+      \strng{namehash}{b29c48e2adfa8813d0821cd69be08ecb}
+      \strng{fullhash}{b29c48e2adfa8813d0821cd69be08ecb}
+      \strng{fullhashraw}{b29c48e2adfa8813d0821cd69be08ecb}
+      \strng{bibnamehash}{b29c48e2adfa8813d0821cd69be08ecb}
+      \strng{authorbibnamehash}{b29c48e2adfa8813d0821cd69be08ecb}
+      \strng{authornamehash}{b29c48e2adfa8813d0821cd69be08ecb}
+      \strng{authorfullhash}{b29c48e2adfa8813d0821cd69be08ecb}
+      \strng{authorfullhashraw}{b29c48e2adfa8813d0821cd69be08ecb}
+      \field{sortinit}{A}
+      \field{sortinithash}{2f401846e2029bad6b3ecc16d50031e2}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{month}{10}
+      \field{title}{Publication manual}
+      \field{year}{2020}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb https://apastyle.apa.org
+      \endverb
+      \verb{url}
+      \verb https://apastyle.apa.org
+      \endverb
+    \endentry
+    \entry{apa3}{inbook}{}{}
+      \name{author}{2}{}{%
+        {{un=0,uniquepart=base,hash=9fc01284519d57b1baee139fcf7fabbd}{%
+           family={García},
+           familyi={G\bibinitperiod},
+           given={María},
+           giveni={M\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=08e2574a4e456a099f684aa077411a1a}{%
+           family={Ångström},
+           familyi={Å\bibinitperiod},
+           given={Lars},
+           giveni={L\bibinitperiod},
+           givenun=0}}%
+      }
+      \name{editor}{1}{}{%
+        {{hash=30d10e926c3169d307e7d370169e0532}{%
+           family={Brown},
+           familyi={B\bibinitperiod},
+           given={Ed},
+           giveni={E\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Publisher}%
+      }
+      \strng{namehash}{faa831276f3787a69692ecebaf3762b4}
+      \strng{fullhash}{faa831276f3787a69692ecebaf3762b4}
+      \strng{fullhashraw}{faa831276f3787a69692ecebaf3762b4}
+      \strng{bibnamehash}{faa831276f3787a69692ecebaf3762b4}
+      \strng{authorbibnamehash}{faa831276f3787a69692ecebaf3762b4}
+      \strng{authornamehash}{faa831276f3787a69692ecebaf3762b4}
+      \strng{authorfullhash}{faa831276f3787a69692ecebaf3762b4}
+      \strng{authorfullhashraw}{faa831276f3787a69692ecebaf3762b4}
+      \strng{editorbibnamehash}{30d10e926c3169d307e7d370169e0532}
+      \strng{editornamehash}{30d10e926c3169d307e7d370169e0532}
+      \strng{editorfullhash}{30d10e926c3169d307e7d370169e0532}
+      \strng{editorfullhashraw}{30d10e926c3169d307e7d370169e0532}
+      \field{sortinit}{G}
+      \field{sortinithash}{32d67eca0634bf53703493fb1090a2e8}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Edited book}
+      \field{title}{Chapter title}
+      \field{year}{2018}
+      \field{dateera}{ce}
+      \field{pages}{1\bibrangedash 20}
+      \range{pages}{20}
+    \endentry
+    \entry{apa2}{book}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=380f6af10ab88987b4793f70f5105365}{%
+           family={Smith},
+           familyi={S\bibinitperiod},
+           given={John\bibnamedelima A.},
+           giveni={J\bibinitperiod\bibinitdelim A\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Example Press}%
+      }
+      \strng{namehash}{380f6af10ab88987b4793f70f5105365}
+      \strng{fullhash}{380f6af10ab88987b4793f70f5105365}
+      \strng{fullhashraw}{380f6af10ab88987b4793f70f5105365}
+      \strng{bibnamehash}{380f6af10ab88987b4793f70f5105365}
+      \strng{authorbibnamehash}{380f6af10ab88987b4793f70f5105365}
+      \strng{authornamehash}{380f6af10ab88987b4793f70f5105365}
+      \strng{authorfullhash}{380f6af10ab88987b4793f70f5105365}
+      \strng{authorfullhashraw}{380f6af10ab88987b4793f70f5105365}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{subtitle}{With a subtitle}
+      \field{title}{A book title}
+      \field{year}{2019}
+      \field{dateera}{ce}
+    \endentry
+    \entry{apa1}{article}{}{}
+      \name{author}{2}{}{%
+        {{un=0,uniquepart=base,hash=380f6af10ab88987b4793f70f5105365}{%
+           family={Smith},
+           familyi={S\bibinitperiod},
+           given={John\bibnamedelima A.},
+           giveni={J\bibinitperiod\bibinitdelim A\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=2e78d1c610f14aaa249dc7edd7c39cb1}{%
+           family={Doe},
+           familyi={D\bibinitperiod},
+           given={Jane\bibnamedelima B.},
+           giveni={J\bibinitperiod\bibinitdelim B\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{b7efa5e373adfb005c853d7fdb340663}
+      \strng{fullhash}{b7efa5e373adfb005c853d7fdb340663}
+      \strng{fullhashraw}{b7efa5e373adfb005c853d7fdb340663}
+      \strng{bibnamehash}{b7efa5e373adfb005c853d7fdb340663}
+      \strng{authorbibnamehash}{b7efa5e373adfb005c853d7fdb340663}
+      \strng{authornamehash}{b7efa5e373adfb005c853d7fdb340663}
+      \strng{authorfullhash}{b7efa5e373adfb005c853d7fdb340663}
+      \strng{authorfullhashraw}{b7efa5e373adfb005c853d7fdb340663}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Journal of Examples}
+      \field{number}{3}
+      \field{title}{An article title in sentence case}
+      \field{volume}{12}
+      \field{year}{2019}
+      \field{dateera}{ce}
+      \field{pages}{45\bibrangedash 67}
+      \range{pages}{23}
+      \verb{doi}
+      \verb 10.1234/abcd.5678
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

@@ -1,0 +1,43 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[style=authoryear, backend=biber]{biblatex}
+\usepackage[hidelinks]{hyperref}
+\addbibresource{refs.bib}
+\emergencystretch=2em
+
+\title{A biblatex test}
+\author{biber-android}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Citation commands}
+
+\textcite{knuth1984} wrote \TeX, and \textcite{lamport1994} built \LaTeX\
+on top of it. In brackets, that is \parencite{knuth1984, lamport1994}.
+With a prenote and a page: \autocite[see][42]{knuth1984}. In a
+footnote.\footcite{shannon1948}
+
+Only the author: \citeauthor{turing1937}. Only the year:
+\citeyear{turing1937}. Several groups at once:
+\cites[1]{godel1931}[173]{erdos1959}.
+
+\section{Names with accents}
+
+\textcite{godel1931} and \textcite{erdos1959} should sort under G and E
+in the bibliography, accents and all.
+
+\section{Other entry types}
+
+A thesis \parencite{shannon1940} and a web page \parencite{biblatex,nojournal,typo2001}.
+
+\section{A missing source}
+
+This key is not in refs.bib, so biblatex warns about it:
+\autocite{missing2024}.
+
+\printbibliography[type=article, title={Articles}]
+\printbibliography[nottype=article, title={Books and other sources}]
+
+\end{document}

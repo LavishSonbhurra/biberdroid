@@ -1,0 +1,431 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.3 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{nyt/global//global/global/global}
+    \entry{nguyen2021}{thesis}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=d49d875bc815e19e1456af0f84947334}{%
+           family={An},
+           familyi={A\bibinitperiod},
+           given={Nguyễn\bibnamedelima Văn},
+           giveni={N\bibinitperiod\bibinitdelim V\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{institution}{1}{%
+        {Đại học Quốc gia}%
+      }
+      \strng{namehash}{d49d875bc815e19e1456af0f84947334}
+      \strng{fullhash}{d49d875bc815e19e1456af0f84947334}
+      \strng{fullhashraw}{d49d875bc815e19e1456af0f84947334}
+      \strng{bibnamehash}{d49d875bc815e19e1456af0f84947334}
+      \strng{authorbibnamehash}{d49d875bc815e19e1456af0f84947334}
+      \strng{authornamehash}{d49d875bc815e19e1456af0f84947334}
+      \strng{authorfullhash}{d49d875bc815e19e1456af0f84947334}
+      \strng{authorfullhashraw}{d49d875bc815e19e1456af0f84947334}
+      \field{sortinit}{A}
+      \field{sortinithash}{2f401846e2029bad6b3ecc16d50031e2}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Phân tích dữ liệu}
+      \field{type}{phdthesis}
+      \field{year}{2021}
+      \field{dateera}{ce}
+      \true{nocite}
+    \endentry
+    \entry{brown2018}{book}{}{}
+      \name{author}{3}{}{%
+        {{un=0,uniquepart=base,hash=62ce1b47717048647a682cd9521d189c}{%
+           family={Brown},
+           familyi={B\bibinitperiod},
+           given={Charles},
+           giveni={C\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=f9ff024741dbd072d106635f74dc1dd1}{%
+           family={Berg},
+           familyi={B\bibinitperiod},
+           given={Hendrik},
+           giveni={H\bibinitperiod},
+           givenun=0,
+           prefix={van\bibnamedelima der},
+           prefixi={v\bibinitperiod\bibinitdelim d\bibinitperiod},
+           prefixun=0}}%
+        {{un=0,uniquepart=base,hash=4774b5f7d4f5a40bc27b0323cd27e860}{%
+           family={Cruz},
+           familyi={C\bibinitperiod},
+           given={Maria},
+           giveni={M\bibinitperiod},
+           givenun=0,
+           prefix={de\bibnamedelima la},
+           prefixi={d\bibinitperiod\bibinitdelim l\bibinitperiod},
+           prefixun=0}}%
+      }
+      \list{location}{1}{%
+        {Hoboken}%
+      }
+      \list{publisher}{1}{%
+        {Wiley}%
+      }
+      \strng{namehash}{6a1c128183a97650ec0905c9f5643b30}
+      \strng{fullhash}{7e6728adb10c41cc13c02611441bfa4f}
+      \strng{fullhashraw}{7e6728adb10c41cc13c02611441bfa4f}
+      \strng{bibnamehash}{7e6728adb10c41cc13c02611441bfa4f}
+      \strng{authorbibnamehash}{7e6728adb10c41cc13c02611441bfa4f}
+      \strng{authornamehash}{6a1c128183a97650ec0905c9f5643b30}
+      \strng{authorfullhash}{7e6728adb10c41cc13c02611441bfa4f}
+      \strng{authorfullhashraw}{7e6728adb10c41cc13c02611441bfa4f}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{2}
+      \field{title}{Particles in Practice}
+      \field{year}{2018}
+      \field{dateera}{ce}
+    \endentry
+    \entry{doe2019}{inproceedings}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=d6cfb2b8c4b3f9440ec4642438129367}{%
+           family={Doe},
+           familyi={D\bibinitperiod},
+           given={Jane},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+      }
+      \name{editor}{2}{}{%
+        {{un=0,uniquepart=base,hash=f2dbd596d28e5a7f01bc4cfb62d47076}{%
+           family={Editor},
+           familyi={E\bibinitperiod},
+           given={Peter},
+           giveni={P\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=260df1a6f3b2dcb95925877419d827b6}{%
+           family={Editrix},
+           familyi={E\bibinitperiod},
+           given={Paula},
+           giveni={P\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{d6cfb2b8c4b3f9440ec4642438129367}
+      \strng{fullhash}{d6cfb2b8c4b3f9440ec4642438129367}
+      \strng{fullhashraw}{d6cfb2b8c4b3f9440ec4642438129367}
+      \strng{bibnamehash}{d6cfb2b8c4b3f9440ec4642438129367}
+      \strng{authorbibnamehash}{d6cfb2b8c4b3f9440ec4642438129367}
+      \strng{authornamehash}{d6cfb2b8c4b3f9440ec4642438129367}
+      \strng{authorfullhash}{d6cfb2b8c4b3f9440ec4642438129367}
+      \strng{authorfullhashraw}{d6cfb2b8c4b3f9440ec4642438129367}
+      \strng{editorbibnamehash}{05ce94e26eca93aa4f95b14950de8d6a}
+      \strng{editornamehash}{05ce94e26eca93aa4f95b14950de8d6a}
+      \strng{editorfullhash}{05ce94e26eca93aa4f95b14950de8d6a}
+      \strng{editorfullhashraw}{05ce94e26eca93aa4f95b14950de8d6a}
+      \field{sortinit}{D}
+      \field{sortinithash}{6f385f66841fb5e82009dc833c761848}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Proceedings of the Gadget Conference}
+      \strng{crossref}{proc2019}
+      \field{title}{Gadgets and Gizmos}
+      \field{year}{2019}
+      \field{dateera}{ce}
+      \field{pages}{33\bibrangedash 40}
+      \range{pages}{8}
+    \endentry
+    \entry{proc2019}{proceedings}{}{}
+      \name{editor}{2}{}{%
+        {{un=0,uniquepart=base,hash=f2dbd596d28e5a7f01bc4cfb62d47076}{%
+           family={Editor},
+           familyi={E\bibinitperiod},
+           given={Peter},
+           giveni={P\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=260df1a6f3b2dcb95925877419d827b6}{%
+           family={Editrix},
+           familyi={E\bibinitperiod},
+           given={Paula},
+           giveni={P\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{publisher}{1}{%
+        {Springer}%
+      }
+      \strng{namehash}{05ce94e26eca93aa4f95b14950de8d6a}
+      \strng{fullhash}{05ce94e26eca93aa4f95b14950de8d6a}
+      \strng{fullhashraw}{05ce94e26eca93aa4f95b14950de8d6a}
+      \strng{bibnamehash}{05ce94e26eca93aa4f95b14950de8d6a}
+      \strng{editorbibnamehash}{05ce94e26eca93aa4f95b14950de8d6a}
+      \strng{editornamehash}{05ce94e26eca93aa4f95b14950de8d6a}
+      \strng{editorfullhash}{05ce94e26eca93aa4f95b14950de8d6a}
+      \strng{editorfullhashraw}{05ce94e26eca93aa4f95b14950de8d6a}
+      \field{sortinit}{E}
+      \field{sortinithash}{8da8a182d344d5b9047633dfc0cc9131}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{editor}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Proceedings of the Gadget Conference}
+      \field{title}{Proceedings of the Gadget Conference}
+      \field{year}{2019}
+      \field{dateera}{ce}
+      \true{nocite}
+    \endentry
+    \entry{knuth84}{book}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=ec08e6f01da5f3814f28a70c89c64656}{%
+           family={Knuth},
+           familyi={K\bibinitperiod},
+           given={Donald\bibnamedelima E.},
+           giveni={D\bibinitperiod\bibinitdelim E\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{location}{1}{%
+        {Reading, Mass.}%
+      }
+      \list{publisher}{1}{%
+        {Addison-Wesley}%
+      }
+      \strng{namehash}{ec08e6f01da5f3814f28a70c89c64656}
+      \strng{fullhash}{ec08e6f01da5f3814f28a70c89c64656}
+      \strng{fullhashraw}{ec08e6f01da5f3814f28a70c89c64656}
+      \strng{bibnamehash}{ec08e6f01da5f3814f28a70c89c64656}
+      \strng{authorbibnamehash}{ec08e6f01da5f3814f28a70c89c64656}
+      \strng{authornamehash}{ec08e6f01da5f3814f28a70c89c64656}
+      \strng{authorfullhash}{ec08e6f01da5f3814f28a70c89c64656}
+      \strng{authorfullhashraw}{ec08e6f01da5f3814f28a70c89c64656}
+      \field{sortinit}{K}
+      \field{sortinithash}{c02bf6bff1c488450c352b40f5d853ab}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{isbn}{0-201-13447-0}
+      \field{title}{The {\TeX}book}
+      \field{year}{1984}
+      \field{dateera}{ce}
+    \endentry
+    \entry{lamport86}{article}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=5d77435450d10a850a5b58577b9a456b}{%
+           family={Lamport},
+           familyi={L\bibinitperiod},
+           given={Leslie},
+           giveni={L\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{5d77435450d10a850a5b58577b9a456b}
+      \strng{fullhash}{5d77435450d10a850a5b58577b9a456b}
+      \strng{fullhashraw}{5d77435450d10a850a5b58577b9a456b}
+      \strng{bibnamehash}{5d77435450d10a850a5b58577b9a456b}
+      \strng{authorbibnamehash}{5d77435450d10a850a5b58577b9a456b}
+      \strng{authornamehash}{5d77435450d10a850a5b58577b9a456b}
+      \strng{authorfullhash}{5d77435450d10a850a5b58577b9a456b}
+      \strng{authorfullhashraw}{5d77435450d10a850a5b58577b9a456b}
+      \field{sortinit}{L}
+      \field{sortinithash}{7c47d417cecb1f4bd38d1825c427a61a}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Software Practice}
+      \field{month}{3}
+      \field{number}{3}
+      \field{title}{{\LaTeX}: A Document Preparation System}
+      \field{volume}{12}
+      \field{year}{1986}
+      \field{dateera}{ce}
+      \true{nocite}
+      \field{pages}{101\bibrangedash 115}
+      \range{pages}{15}
+    \endentry
+    \entry{smith2020c}{article}{}{}
+      \name{author}{1}{}{%
+        {{un=2,uniquepart=given,hash=5316ab1348653e80cba2ff52759ac787}{%
+           family={Smith},
+           familyi={S\bibinitperiod},
+           given={Joan},
+           giveni={J\bibinitperiod},
+           givenun=2}}%
+      }
+      \strng{namehash}{5316ab1348653e80cba2ff52759ac787}
+      \strng{fullhash}{5316ab1348653e80cba2ff52759ac787}
+      \strng{fullhashraw}{5316ab1348653e80cba2ff52759ac787}
+      \strng{bibnamehash}{5316ab1348653e80cba2ff52759ac787}
+      \strng{authorbibnamehash}{5316ab1348653e80cba2ff52759ac787}
+      \strng{authornamehash}{5316ab1348653e80cba2ff52759ac787}
+      \strng{authorfullhash}{5316ab1348653e80cba2ff52759ac787}
+      \strng{authorfullhashraw}{5316ab1348653e80cba2ff52759ac787}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{day}{14}
+      \field{journaltitle}{Widget Review}
+      \field{month}{7}
+      \field{title}{Widgets Reconsidered}
+      \field{urlday}{2}
+      \field{urlmonth}{1}
+      \field{urlyear}{2024}
+      \field{year}{2020}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://example.org/widgets
+      \endverb
+      \verb{url}
+      \verb https://example.org/widgets
+      \endverb
+    \endentry
+    \entry{smith2020a}{article}{}{}
+      \name{author}{3}{ul=3}{%
+        {{un=2,uniquepart=given,hash=5d0ddda3a367ceb26fbaeca02e391c22}{%
+           family={Smith},
+           familyi={S\bibinitperiod},
+           given={John},
+           giveni={J\bibinitperiod},
+           givenun=2}}%
+        {{un=0,uniquepart=base,hash=d6cfb2b8c4b3f9440ec4642438129367}{%
+           family={Doe},
+           familyi={D\bibinitperiod},
+           given={Jane},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=31ee1db9c67b2817b746426d40e4c754}{%
+           family={Khan},
+           familyi={K\bibinitperiod},
+           given={Ali},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{071664ac4c9da9cb152f414703eb90ab}
+      \strng{fullhash}{071664ac4c9da9cb152f414703eb90ab}
+      \strng{fullhashraw}{071664ac4c9da9cb152f414703eb90ab}
+      \strng{bibnamehash}{071664ac4c9da9cb152f414703eb90ab}
+      \strng{authorbibnamehash}{071664ac4c9da9cb152f414703eb90ab}
+      \strng{authornamehash}{071664ac4c9da9cb152f414703eb90ab}
+      \strng{authorfullhash}{071664ac4c9da9cb152f414703eb90ab}
+      \strng{authorfullhashraw}{071664ac4c9da9cb152f414703eb90ab}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Journal of Widgets}
+      \field{title}{First Results on Widgets}
+      \field{volume}{4}
+      \field{year}{2020}
+      \field{dateera}{ce}
+      \field{pages}{1\bibrangedash 10}
+      \range{pages}{10}
+      \verb{doi}
+      \verb 10.1000/jw.2020.1
+      \endverb
+    \endentry
+    \entry{smith2020b}{article}{}{}
+      \name{author}{3}{ul=3}{%
+        {{un=2,uniquepart=given,hash=5d0ddda3a367ceb26fbaeca02e391c22}{%
+           family={Smith},
+           familyi={S\bibinitperiod},
+           given={John},
+           giveni={J\bibinitperiod},
+           givenun=2}}%
+        {{un=0,uniquepart=base,hash=d6cfb2b8c4b3f9440ec4642438129367}{%
+           family={Doe},
+           familyi={D\bibinitperiod},
+           given={Jane},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=19e84f21687825cff18686405a6a1182}{%
+           family={Kim},
+           familyi={K\bibinitperiod},
+           given={Bea},
+           giveni={B\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{e0ce73cd3290ee313b5fbf202fc71bb4}
+      \strng{fullhash}{e0ce73cd3290ee313b5fbf202fc71bb4}
+      \strng{fullhashraw}{e0ce73cd3290ee313b5fbf202fc71bb4}
+      \strng{bibnamehash}{e0ce73cd3290ee313b5fbf202fc71bb4}
+      \strng{authorbibnamehash}{e0ce73cd3290ee313b5fbf202fc71bb4}
+      \strng{authornamehash}{e0ce73cd3290ee313b5fbf202fc71bb4}
+      \strng{authorfullhash}{e0ce73cd3290ee313b5fbf202fc71bb4}
+      \strng{authorfullhashraw}{e0ce73cd3290ee313b5fbf202fc71bb4}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Journal of Widgets}
+      \field{title}{Second Results on Widgets}
+      \field{volume}{4}
+      \field{year}{2020}
+      \field{dateera}{ce}
+      \field{pages}{11\bibrangedash 20}
+      \range{pages}{10}
+    \endentry
+    \entry{web2023}{online}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=54073a1a19bb7c25feff0db7b49a3d87}{%
+           family={{World Widget Organization}},
+           familyi={W\bibinitperiod}}}%
+      }
+      \strng{namehash}{54073a1a19bb7c25feff0db7b49a3d87}
+      \strng{fullhash}{54073a1a19bb7c25feff0db7b49a3d87}
+      \strng{fullhashraw}{54073a1a19bb7c25feff0db7b49a3d87}
+      \strng{bibnamehash}{54073a1a19bb7c25feff0db7b49a3d87}
+      \strng{authorbibnamehash}{54073a1a19bb7c25feff0db7b49a3d87}
+      \strng{authornamehash}{54073a1a19bb7c25feff0db7b49a3d87}
+      \strng{authorfullhash}{54073a1a19bb7c25feff0db7b49a3d87}
+      \strng{authorfullhashraw}{54073a1a19bb7c25feff0db7b49a3d87}
+      \field{sortinit}{W}
+      \field{sortinithash}{4315d78024d0cea9b57a0c6f0e35ed0d}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Widget Statistics 2023}
+      \field{urlday}{6}
+      \field{urlmonth}{5}
+      \field{urlyear}{2023}
+      \field{year}{2023}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \true{nocite}
+      \verb{urlraw}
+      \verb https://example.org/stats
+      \endverb
+      \verb{url}
+      \verb https://example.org/stats
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+
