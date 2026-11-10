@@ -181,7 +181,7 @@ jobs:
           {
             echo "biber 2.21 for Android (arm64-v8a, API 26 and later), for biblatex 3.21."
             echo
-            echo "The Android library is the .aar below; the README shows how to use it. It is on Maven Central as \`io.github.lavishsonbhurra:biberdroid:$BIBERDROID_VERSION\` only once the Central upload of this version has been published. The sources file holds the complete source of everything in the payload."
+            echo "The Android library is the .aar below; the README shows how to use it. On Maven Central it is \`io.github.lavishsonbhurra:biberdroid:$BIBERDROID_VERSION\`, available once the Central upload of this version has been published. The sources file holds the complete source of everything in the payload."
             echo
             echo '```'
             cat dist/SHA256SUMS

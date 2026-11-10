@@ -19,9 +19,6 @@ In this order:
 3. Expect a green build on `main`; re-run it if it started before step 2 and failed in
    `fetch`.
 4. Set up Maven Central (below), then tag the first release.
-5. Once the first version is published on Maven Central, edit the README: remove the "Not on
-   Maven Central yet" note and replace the two `files(...)` and `xz` lines with
-   `implementation("io.github.lavishsonbhurra:biberdroid:<version>")`.
 
 ## Versions
 

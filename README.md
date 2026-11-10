@@ -2,6 +2,7 @@
 
 [![build](https://github.com/LavishSonbhurra/biberdroid/actions/workflows/build.yml/badge.svg)](https://github.com/LavishSonbhurra/biberdroid/actions/workflows/build.yml)
 [![release](https://img.shields.io/github/v/release/LavishSonbhurra/biberdroid)](https://github.com/LavishSonbhurra/biberdroid/releases/latest)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.lavishsonbhurra/biberdroid)](https://central.sonatype.com/artifact/io.github.lavishsonbhurra/biberdroid)
 [![license](https://img.shields.io/github/license/LavishSonbhurra/biberdroid)](LICENSE)
 
 biberdroid packages [biber](https://github.com/plk/biber), the bibliography processor behind
@@ -32,8 +33,6 @@ it does not know.
 
 ### Gradle
 
-> **Not on Maven Central yet.** Until it is, download `biberdroid-<version>.aar` from [Releases](https://github.com/LavishSonbhurra/biberdroid/releases) into `app/libs` and use the `files(...)` dependency below.
-
 ```kotlin
 // build.gradle.kts of the app
 android {
@@ -55,10 +54,7 @@ android {
 }
 
 dependencies {
-    // The AAR from Releases, and its one dependency. Once the library is on Maven Central,
-    // use implementation("io.github.lavishsonbhurra:biberdroid:2.21-1") instead.
-    implementation(files("libs/biberdroid-2.21-1.aar"))
-    implementation("org.tukaani:xz:1.12")
+    implementation("io.github.lavishsonbhurra:biberdroid:2.21-1")
 }
 ```
 
