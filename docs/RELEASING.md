@@ -1,10 +1,27 @@
 # Releasing
 
+- [First publication](#first-publication)
 - [Versions](#versions)
 - [A release](#a-release)
 - [Maven Central](#maven-central)
 - [The download mirror](#the-download-mirror)
 - [Licence obligations](#licence-obligations)
+
+## First publication
+
+In this order:
+
+1. Create the repository on GitHub and push `main`.
+2. Run `scripts/mirror-upload.sh` from a checkout that has run `./build.sh fetch` and
+   `scripts/sources.sh`. It creates the `pinned-downloads` prerelease with every pinned file.
+   Until it exists, the build fails as soon as Termux has moved one of the pinned `.deb`
+   files.
+3. Expect a green build on `main`; re-run it if it started before step 2 and failed in
+   `fetch`.
+4. Set up Maven Central (below), then tag the first release.
+5. Once the first version is published on Maven Central, edit the README: remove the "Not on
+   Maven Central yet" note and replace the two `files(...)` and `xz` lines with
+   `implementation("io.github.lavishsonbhurra:biber-android:<version>")`.
 
 ## Versions
 
@@ -36,13 +53,14 @@ publishes a GitHub release with these files:
 
 ## Maven Central
 
-The `central` job uploads the AAR as `io.github.lavishsonbhurra:biber-android:<version>`. It
-runs only on a tag, after the GitHub release, and only when all four secrets below are set;
-otherwise it notes that it skipped the upload. It signs the publication with Gradle, checks
-that the signed AAR is byte-identical to the one in the GitHub release, and uploads the bundle
-to the Central Portal as `USER_MANAGED`. The deployment stops at VALIDATED: nothing is public
-until someone presses Publish at <https://central.sonatype.com/publishing/deployments>, which
-cannot be undone.
+Two jobs handle Maven Central, `io.github.lavishsonbhurra:biber-android:<version>`. Both run
+only on a tag and only when all four secrets below are set; otherwise they note that they
+skipped. `sign` runs before the GitHub release is created: it builds the publication again
+with Gradle signing, checks that its AAR is byte-identical to the one going into the release,
+and packs the bundle, so a mismatch stops the tag before anything is published. `central`
+runs after the release and uploads the bundle to the Central Portal as `USER_MANAGED`. The
+deployment stops at VALIDATED: nothing is public until someone presses Publish at
+<https://central.sonatype.com/publishing/deployments>, which cannot be undone.
 
 Set these in a GitHub environment named `maven-central`:
 
@@ -70,8 +88,9 @@ Gradle also reads the key from the properties `signingInMemoryKey` and
 
 ## The download mirror
 
-Before tagging a release with new pins, copy the pinned downloads to the `pinned-downloads`
-release so that the build can still run after Termux removes the old packages:
+After the first push, and whenever a pin changes, copy the pinned downloads to the
+`pinned-downloads` prerelease so that the build can still run after Termux removes the old
+packages:
 
 ```sh
 ./build.sh fetch && scripts/sources.sh && scripts/mirror-upload.sh --dry-run

@@ -51,8 +51,9 @@ public object Biber {
     public fun launcher(context: Context): File = File(context.applicationInfo.nativeLibraryDir, LAUNCHER)
 
     /**
-     * Whether biber can run here: the launcher was installed, which needs an arm64-v8a
-     * device and native libraries extracted at install time.
+     * Whether the launcher is in this install's `nativeLibraryDir`. It is missing on a
+     * device without arm64-v8a, and when the app's native libraries are not extracted at
+     * install time (`useLegacyPackaging` off). It does not start biber.
      */
     @JvmStatic
     public fun isSupported(context: Context): Boolean = launcher(context).isFile
@@ -70,7 +71,8 @@ public object Biber {
      *
      * The tree is written into a fresh folder beside [home], with the version marker last,
      * then swapped into place by renaming, so a process killed at any point leaves either
-     * the old tree or none, and the next call starts over. `nativeLibraryDir` changes when
+     * the old tree or none, and the next call starts over. If the new tree cannot be moved
+     * into place, the old one is put back. `nativeLibraryDir` changes when
      * the app is updated, so the link is checked once per process.
      *
      * @throws UnsupportedOperationException when [isSupported] is false.
@@ -140,6 +142,8 @@ public object Biber {
         biber.applyTo(env)
         env.putAll(environment)
         val process = pb.start()
+        // biber reads no input; a closed stdin means nothing can wait on it.
+        process.outputStream.close()
         val output = ByteArrayOutputStream()
         val reader = Thread {
             val buf = ByteArray(8192)
@@ -202,15 +206,12 @@ public object Biber {
             }
             File(fresh, "bin").mkdirs()
             File(fresh, MARKER).writeText(version)
-            if (home.exists() && !home.renameTo(old)) throw IOException("Could not move the old tree aside")
-            if (!fresh.renameTo(home)) throw IOException("Could not move the tree into place")
         } catch (e: IOException) {
             // Storage is usually full here: leave nothing half-written behind.
             fresh.deleteRecursively()
             throw e
-        } finally {
-            old.deleteRecursively()
         }
+        TreeSwap.swap(fresh, home, old)
     }
 
     /** Points [link] at [target], replacing a link to an older install's launcher by a rename. */

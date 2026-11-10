@@ -10,16 +10,17 @@ below, generated from the build's `COMPONENTS.tsv`. Each release also carries:
   file to its component.
 
 Where a component lets the recipient choose a licence (Perl and most CPAN modules: the
-Artistic License or the GPL), it is distributed here under the Artistic License. The licence
-texts are in [licenses/](licenses).
+Artistic License or the GPL), it is distributed here under the Artistic License. Perl's
+Unicode data (`lib/unicore` and the collation table in `libpl_Unicode_Collate.so`) is under
+the Unicode License v3. The licence texts are in [licenses/](licenses).
 
 | Component | Version | Licence | Source | Files |
 | --- | --- | --- | --- | ---: |
 | biber | 2.21 | Artistic-2.0 | <https://github.com/plk/biber/archive/refs/tags/v2.21.tar.gz> | 37 |
 | biber-android | - | Artistic-2.0 | <https://github.com/LavishSonbhurra/biber-android> (src/biber-launcher.c, src/BiberNative.pm) | 2 |
-| libiconv | 1.19.1 (Termux libiconv 1.19.1) | LGPL-2.1-or-later (library) | <https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.19.1.tar.gz><br><https://github.com/termux/termux-packages/tree/master/packages/libiconv> | 1 |
+| libiconv | 1.19.1 (Termux libiconv 1.19.1) | LGPL-2.1-or-later | <https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.19.1.tar.gz><br><https://github.com/termux/termux-packages/tree/master/packages/libiconv> | 1 |
 | libxml2 | 2.15.4 (Termux libxml2 2.15.4-1) | MIT | <https://download.gnome.org/sources/libxml2/2.15/libxml2-2.15.4.tar.xz><br><https://github.com/termux/termux-packages/tree/master/packages/libxml2> | 1 |
-| perl | 5.44.0 (Termux perl 5.44.0-1) | Artistic-1.0-Perl OR GPL-1.0-or-later; lib/unicore and the collation table in libpl_Unicode_Collate.so are Unicode data (Unicode-3.0) | <https://www.cpan.org/src/5.0/perl-5.44.0.tar.gz><br><https://github.com/termux/termux-packages/tree/master/packages/perl> | 263 |
+| perl | 5.44.0 (Termux perl 5.44.0-1) | (Artistic-1.0-Perl OR GPL-1.0-or-later) AND Unicode-3.0 | <https://www.cpan.org/src/5.0/perl-5.44.0.tar.gz><br><https://github.com/termux/termux-packages/tree/master/packages/perl> | 263 |
 | zlib | 1.4 (Termux zlib 1.4) | Zlib | <https://zlib.net/><br><https://github.com/termux/termux-packages/tree/master/packages/zlib> | 1 |
 | autovivification | 0.18 | Artistic-1.0-Perl OR GPL-1.0-or-later | <https://cpan.metacpan.org/authors/id/V/VP/VPIT/autovivification-0.18.tar.gz> | 2 |
 | B-Hooks-EndOfScope | 0.28 | Artistic-1.0-Perl OR GPL-1.0-or-later | <https://cpan.metacpan.org/authors/id/E/ET/ETHER/B-Hooks-EndOfScope-0.28.tar.gz> | 5 |
@@ -33,7 +34,7 @@ texts are in [licenses/](licenses).
 | Class-Inspector | 1.36 | Artistic-1.0-Perl OR GPL-1.0-or-later | <https://cpan.metacpan.org/authors/id/P/PL/PLICEASE/Class-Inspector-1.36.tar.gz> | 2 |
 | Class-Singleton | 1.6 | Artistic-1.0-Perl OR GPL-1.0-or-later | <https://cpan.metacpan.org/authors/id/S/SH/SHAY/Class-Singleton-1.6.tar.gz> | 1 |
 | Clone | 0.51 | Artistic-1.0-Perl OR GPL-1.0-or-later | <https://cpan.metacpan.org/authors/id/A/AT/ATOOMIC/Clone-0.51.tar.gz> | 2 |
-| Data-Compare | 1.29 | artistic_1 / gpl_2 | <https://cpan.metacpan.org/authors/id/D/DC/DCANTRELL/Data-Compare-1.29.tar.gz> | 2 |
+| Data-Compare | 1.29 | Artistic-1.0-Perl OR GPL-2.0-only | <https://cpan.metacpan.org/authors/id/D/DC/DCANTRELL/Data-Compare-1.29.tar.gz> | 2 |
 | Data-Dump | 1.25 | Artistic-1.0-Perl OR GPL-1.0-or-later | <https://cpan.metacpan.org/authors/id/G/GA/GARU/Data-Dump-1.25.tar.gz> | 4 |
 | Data-Uniqid | 0.12 | Artistic-1.0-Perl OR GPL-1.0-or-later | <https://cpan.metacpan.org/authors/id/M/MW/MWX/Data-Uniqid-0.12.tar.gz> | 2 |
 | DateTime | 1.68 | Artistic-2.0 | <https://cpan.metacpan.org/authors/id/D/DR/DROLSKY/DateTime-1.68.tar.gz> | 10 |
@@ -53,7 +54,7 @@ texts are in [licenses/](licenses).
 | File-Slurper | 0.014 | Artistic-1.0-Perl OR GPL-1.0-or-later | <https://cpan.metacpan.org/authors/id/L/LE/LEONT/File-Slurper-0.014.tar.gz> | 1 |
 | File-Which | 1.27 | Artistic-1.0-Perl OR GPL-1.0-or-later | <https://cpan.metacpan.org/authors/id/P/PL/PLICEASE/File-Which-1.27.tar.gz> | 1 |
 | IO-String | 1.08 | Artistic-1.0-Perl OR GPL-1.0-or-later | <https://cpan.metacpan.org/authors/id/G/GA/GAAS/IO-String-1.08.tar.gz> | 1 |
-| IPC-Run3 | 0.049 | BSD/Artistic/GPL (IPC-Run3: any of) | <https://cpan.metacpan.org/authors/id/R/RJ/RJBS/IPC-Run3-0.049.tar.gz> | 6 |
+| IPC-Run3 | 0.049 | BSD-3-Clause OR Artistic-1.0-Perl OR GPL-1.0-or-later | <https://cpan.metacpan.org/authors/id/R/RJ/RJBS/IPC-Run3-0.049.tar.gz> | 6 |
 | Lingua-Translit | 0.29 | Artistic-1.0-Perl OR GPL-1.0-or-later | <https://cpan.metacpan.org/authors/id/A/AL/ALINKE/Lingua-Translit-0.29.tar.gz> | 2 |
 | List-AllUtils | 0.19 | Artistic-2.0 | <https://cpan.metacpan.org/authors/id/D/DR/DROLSKY/List-AllUtils-0.19.tar.gz> | 1 |
 | List-MoreUtils | 0.430 | Apache-2.0 | <https://cpan.metacpan.org/authors/id/R/RE/REHSACK/List-MoreUtils-0.430.tar.gz> | 2 |
@@ -75,7 +76,7 @@ texts are in [licenses/](licenses).
 | Params-ValidationCompiler | 0.31 | Artistic-2.0 | <https://cpan.metacpan.org/authors/id/D/DR/DROLSKY/Params-ValidationCompiler-0.31.tar.gz> | 3 |
 | Parse-RecDescent | 1.967015 | Artistic-1.0-Perl OR GPL-1.0-or-later | <https://cpan.metacpan.org/authors/id/J/JT/JTBRAUN/Parse-RecDescent-1.967015.tar.gz> | 1 |
 | PerlIO-utf8_strict | 0.010 | Artistic-1.0-Perl OR GPL-1.0-or-later | <https://cpan.metacpan.org/authors/id/L/LE/LEONT/PerlIO-utf8_strict-0.010.tar.gz> | 2 |
-| Regexp-Common | 2024080801 | MIT / bsd / artistic_1 / Artistic-2.0 | <https://cpan.metacpan.org/authors/id/A/AB/ABIGAIL/Regexp-Common-2024080801.tar.gz> | 33 |
+| Regexp-Common | 2024080801 | MIT OR BSD-3-Clause OR Artistic-1.0-Perl OR Artistic-2.0 | <https://cpan.metacpan.org/authors/id/A/AB/ABIGAIL/Regexp-Common-2024080801.tar.gz> | 33 |
 | Role-Tiny | 2.002005 | Artistic-1.0-Perl OR GPL-1.0-or-later | <https://cpan.metacpan.org/authors/id/H/HA/HAARG/Role-Tiny-2.002005.tar.gz> | 2 |
 | Sort-Key | 1.33 | Artistic-1.0-Perl OR GPL-1.0-or-later | <https://cpan.metacpan.org/authors/id/S/SA/SALVA/Sort-Key-1.33.tar.gz> | 7 |
 | Specio | 0.53 | Artistic-2.0 | <https://cpan.metacpan.org/authors/id/D/DR/DROLSKY/Specio-0.53.tar.gz> | 41 |
@@ -95,5 +96,5 @@ texts are in [licenses/](licenses).
 | XML-NamespaceSupport | 1.12 | Artistic-1.0-Perl OR GPL-1.0-or-later | <https://cpan.metacpan.org/authors/id/P/PE/PERIGRIN/XML-NamespaceSupport-1.12.tar.gz> | 1 |
 | XML-SAX | 1.02 | Artistic-1.0-Perl OR GPL-1.0-or-later | <https://cpan.metacpan.org/authors/id/G/GR/GRANTM/XML-SAX-1.02.tar.gz> | 20 |
 | XML-SAX-Base | 1.09 | Artistic-1.0-Perl OR GPL-1.0-or-later | <https://cpan.metacpan.org/authors/id/G/GR/GRANTM/XML-SAX-Base-1.09.tar.gz> | 3 |
-| XML-Writer | 0.900 | Unrestricted (XML-Writer) | <https://cpan.metacpan.org/authors/id/J/JO/JOSEPHW/XML-Writer-0.900.tar.gz> | 1 |
+| XML-Writer | 0.900 | LicenseRef-XML-Writer (use and redistribution permitted under any circumstances) | <https://cpan.metacpan.org/authors/id/J/JO/JOSEPHW/XML-Writer-0.900.tar.gz> | 1 |
 | XString | 0.005 | Artistic-1.0-Perl OR GPL-1.0-or-later | <https://cpan.metacpan.org/authors/id/A/AT/ATOOMIC/XString-0.005.tar.gz> | 2 |

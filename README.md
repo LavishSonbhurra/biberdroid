@@ -12,9 +12,10 @@ that needs to turn a biblatex `.bcf` file into a `.bbl`.
 
 ## What you get
 
-- **biber 2.21**, unchanged, with Perl 5.44 and the 112 CPAN distributions it uses
+- **biber 2.21**, unchanged, with Perl 5.44, built from 112 pinned CPAN distributions, 76 of
+  which ship files
 - **arm64-v8a**, **Android 8.0 (API 26) and later**; every library is aligned for 16 KB pages
-- **Size**: 46 libraries, 11.8 MB (3.9 MB compressed), and a Perl tree of 12.5 MB that ships
+- **Size**: 46 libraries, 11.8 MB (3.8 MB compressed), and a Perl tree of 12.5 MB that ships
   as a 2.1 MB `.tar.xz`
 - **Output** byte-identical to the official biber 2.21 binary's on the test documents
 - An **Android library** (AAR) that installs and runs it, or plain release files if you
@@ -30,6 +31,8 @@ it does not know.
 ## Quick start
 
 ### Gradle
+
+> **Not on Maven Central yet.** Until it is, download `biber-android-<version>.aar` from [Releases](https://github.com/LavishSonbhurra/biber-android/releases) into `app/libs` and use the `files(...)` dependency below.
 
 ```kotlin
 // build.gradle.kts of the app
@@ -52,7 +55,10 @@ android {
 }
 
 dependencies {
-    implementation("io.github.lavishsonbhurra:biber-android:2.21-1")
+    // The AAR from Releases, and its one dependency. Once the library is on Maven Central,
+    // use implementation("io.github.lavishsonbhurra:biber-android:2.21-1") instead.
+    implementation(files("libs/biber-android-2.21-1.aar"))
+    implementation("org.tukaani:xz:1.12")
 }
 ```
 
@@ -67,9 +73,10 @@ if (!result.succeeded) Log.w("biber", result.output)
 ```
 
 `Biber.run` unpacks the Perl tree into `filesDir/biber` on first use (a second or two), starts
-biber, waits for it and returns its exit code and output. `Biber.isSupported(context)` tells
-whether biber can run on the device, and `Biber.notices(context)` returns the licence notices
-for your app's licences screen.
+biber, waits for it and returns its exit code and output. `Biber.isSupported(context)` checks
+that the launcher was installed into `nativeLibraryDir` (it is not on a device without
+arm64-v8a, or when native libraries are not extracted), and `Biber.notices(context)` returns
+the licence notices for your app's licences screen.
 
 ### With Tectonic
 
@@ -115,9 +122,9 @@ details.
 ## How it works
 
 - `libbiber.so` is a small launcher ([src/biber-launcher.c](src/biber-launcher.c)) that embeds
-  Perl and runs biber's own script from the unpacked tree. Android only lets an app targeting
-  API 29 or later start programs from its `nativeLibraryDir`, and only installs files named
-  `lib*.so` there, hence the name.
+  Perl and runs biber's own script from the unpacked tree. Apps targeting API 29 or later may
+  only start programs from `nativeLibraryDir`, and Android only installs files named `lib*.so`
+  there, hence the name.
 - `libperl.so`, `libxml216.so`, `libz1.so` and `libiconv.so` are Termux's builds, with
   versioned names made APK-safe and their `RUNPATH` removed by patchelf.
 - The compiled parts of Perl modules ship as `libpl_<Module>.so`.
@@ -131,9 +138,8 @@ the work, with no emulator. Every download is pinned by SHA-256.
 
 ## Building from source
 
-On an arm64 Linux host with sudo, curl, python3, patchelf and git (a GitHub
-`ubuntu-24.04-arm` runner works) and about 2 GB of disk; it takes under 10 minutes on a
-2-core VM once the downloads are in place:
+You need an arm64 Linux host with sudo, curl, python3, patchelf, git and about 2 GB of disk.
+A GitHub `ubuntu-24.04-arm` runner should work.
 
 ```sh
 ./build.sh                 # payload in work/out, release files in work/dist
@@ -149,7 +155,8 @@ releases.
 
 ## Limitations
 
-- arm64-v8a only. On other devices `Biber.isSupported` is false.
+- arm64-v8a only. On other devices the launcher is not installed and `Biber.isSupported` is
+  false.
 - No remote data sources: the network modules (LWP, TLS) are left out, so a `.bib` file must be
   a local file.
 - The extra CJK encodings of Encode::HanExtra, Encode::JIS2K and Encode::EUCJPASCII are left
@@ -163,9 +170,9 @@ releases.
 
 ## Status
 
-The payload is built and checked on Android 9's bionic in a chroot (the checks above), and its
-files are identical to a build that ships in an app. Not yet verified: the GitHub Actions
-workflow, which has not run, and this repository's AAR inside an app on a device.
+The payload is built locally and passes the checks above on Android 9's bionic in a chroot,
+and an app built against the AAR packages it as required. Not yet verified: the GitHub Actions
+workflow, which has not run, and the AAR running inside an app on a device.
 
 ## Licences
 

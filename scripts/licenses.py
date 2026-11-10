@@ -24,20 +24,24 @@ TERMUX_PKGS = "https://github.com/termux/termux-packages/tree/master/packages/"
 LICENSE_FIX = {"Data-Uniqid": "perl_5", "Sort-Key": "perl_5", "IO-String": "perl_5",
                "File-Find-Rule": "perl_5", "Number-Compare": "perl_5", "XML-SAX": "perl_5",
                "Algorithm-Diff": "perl_5", "Encode-JIS2K": "perl_5"}
-SPDX = {"perl_5": "Artistic-1.0-Perl OR GPL-1.0-or-later", "perl": "Artistic-1.0-Perl OR GPL-1.0-or-later", "artistic_2": "Artistic-2.0",
-        "apache_2_0": "Apache-2.0", "mit": "MIT", "unrestricted": "Unrestricted (XML-Writer)",
-        "open_source": "BSD/Artistic/GPL (IPC-Run3: any of)"}
+SPDX = {"perl_5": "Artistic-1.0-Perl OR GPL-1.0-or-later", "perl": "Artistic-1.0-Perl OR GPL-1.0-or-later",
+        "artistic_1": "Artistic-1.0-Perl", "artistic_2": "Artistic-2.0", "gpl_2": "GPL-2.0-only",
+        "apache_2_0": "Apache-2.0", "mit": "MIT", "bsd": "BSD-3-Clause",
+        # IPC-Run3's POD: "the BSD, Artistic, or GPL licenses, any version".
+        "open_source": "BSD-3-Clause OR Artistic-1.0-Perl OR GPL-1.0-or-later",
+        # XML-Writer's LICENSE: "Redistribution and use in source and compiled forms, with or
+        # without modification, are permitted under any circumstances. No warranty."
+        "unrestricted": "LicenseRef-XML-Writer (use and redistribution permitted under any circumstances)"}
 
 FIXED = {
     "perl": ("5.44.0 (Termux perl 5.44.0-1)",
-             "Artistic-1.0-Perl OR GPL-1.0-or-later; lib/unicore and the collation table in "
-             "libpl_Unicode_Collate.so are Unicode data (Unicode-3.0)",
+             "(Artistic-1.0-Perl OR GPL-1.0-or-later) AND Unicode-3.0",
              "https://www.cpan.org/src/5.0/perl-5.44.0.tar.gz + " + TERMUX_PKGS + "perl"),
     "biber": ("2.21", "Artistic-2.0", "https://github.com/plk/biber/archive/refs/tags/v2.21.tar.gz"),
     "libxml2": ("2.15.4 (Termux libxml2 2.15.4-1)", "MIT",
                 "https://download.gnome.org/sources/libxml2/2.15/libxml2-2.15.4.tar.xz + " + TERMUX_PKGS + "libxml2"),
     "zlib": ("1.4 (Termux zlib 1.4)", "Zlib", "https://zlib.net/ + " + TERMUX_PKGS + "zlib"),
-    "libiconv": ("1.19.1 (Termux libiconv 1.19.1)", "LGPL-2.1-or-later (library)",
+    "libiconv": ("1.19.1 (Termux libiconv 1.19.1)", "LGPL-2.1-or-later",
                  "https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.19.1.tar.gz + " + TERMUX_PKGS + "libiconv"),
     "biber-android": ("-", "Artistic-2.0", "https://github.com/LavishSonbhurra/biber-android (src/biber-launcher.c, src/BiberNative.pm)"),
 }
@@ -74,7 +78,7 @@ for line in open(os.path.join(HERE, "cpan-pins.sha256")):
     base = dist.rsplit("-", 1)[0]
     if "unknown" in lic:
         lic = LICENSE_FIX.get(base, lic)
-    lic = " / ".join(SPDX.get(x, x) for x in dict.fromkeys(lic.split(",")) if x != "unknown") or "unknown"
+    lic = " OR ".join(SPDX.get(x, x) for x in dict.fromkeys(lic.split(",")) if x != "unknown") or "unknown"
     dists[dist] = (ver, lic, url)
     files_of[dist] = [n[4:] if n.startswith("lib/") else n for n in names if n.endswith((".pm", ".xs"))]
 

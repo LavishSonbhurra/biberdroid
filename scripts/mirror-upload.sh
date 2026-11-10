@@ -2,8 +2,9 @@
 # Uploads every pinned download (pins.txt, scripts/cpan-pins.sha256 and
 # source-pins.txt) as assets of this repository's "pinned-downloads" release,
 # where build.sh and scripts/sources.sh look when an upstream URL fails.
-# Termux deletes old .deb files soon after a version bump, so run this once
-# after changing a pin, while the files can still be fetched.
+# Termux deletes old .deb files soon after a version bump, so run this right
+# after the first push and whenever a pin changes, while the files can still be
+# fetched. The release is a prerelease, so it never shows as the latest version.
 #
 #   ./build.sh fetch && scripts/sources.sh && scripts/mirror-upload.sh [--dry-run]
 #
@@ -33,7 +34,7 @@ for f in "${files[@]}"; do [ -f "$f" ] || { echo "missing $f: run ./build.sh fet
 if ! gh release view $TAG --repo "$REPO" >/dev/null 2>&1; then
   notes="Copies of the files the build downloads, for when an upstream URL stops working. Every file is checked against the SHA-256 in pins.txt, scripts/cpan-pins.sha256 or source-pins.txt before use."
   if [ "$DRY" = --dry-run ]; then echo "would create release $TAG"
-  else gh release create $TAG --repo "$REPO" --title "Pinned downloads" --notes "$notes" --latest=false; fi
+  else gh release create $TAG --repo "$REPO" --title "Pinned downloads" --notes "$notes" --prerelease --latest=false; fi
 fi
 have=$(gh release view $TAG --repo "$REPO" --json assets -q '.assets[].name' 2>/dev/null || true)
 todo=()

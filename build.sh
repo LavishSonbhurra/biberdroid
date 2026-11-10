@@ -129,7 +129,7 @@ package() {
   sudo python3 -I $S/package.py $W/rootfs $W/out
   sudo python3 -I $S/licenses.py $W/rootfs $W/out $DL/cpan
   sudo chown -R "$(id -u):$(id -g)" $W/out
-  python3 -I $S/notices.py $W/out $DL/cpan
+  BIBER_ANDROID_VERSION=$VERSION python3 -I $S/notices.py $W/out $DL/cpan
   python3 -I $S/check-elf.py $W/out/jniLibs/arm64-v8a
   # The Perl tree as an app unpacks it, and its SHA-256 (the tree's version marker).
   python3 -I $S/archive.py $W/out/assets/biber $W/out/perl-tree.tar.xz

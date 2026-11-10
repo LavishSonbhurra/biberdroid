@@ -2,8 +2,9 @@
 # CPAN tarballs are in scripts/cpan-pins.sha256 (cpan.metacpan.org keeps every
 # release). Termux keeps only the newest build of a package, so the .deb URLs
 # stop working after its next version bump; build.sh then falls back to the
-# copies kept as assets of this repository's "pinned-downloads" release
-# (scripts/mirror-upload.sh puts them there).
+# copies kept as assets of this repository's "pinned-downloads" release.
+# That release must exist before the .debs move: run scripts/mirror-upload.sh
+# right after the first push, and again whenever a pin changes.
 
 # termux-docker:aarch64 root filesystem layer (manifest digest
 # sha256:d0415618cbbf8433a23cf5bddb198eeb62bcba1243ccfc1d015b2f464bd609d5,

@@ -21,8 +21,9 @@ below, generated from the build's `COMPONENTS.tsv`. Each release also carries:
   file to its component.
 
 Where a component lets the recipient choose a licence (Perl and most CPAN modules: the
-Artistic License or the GPL), it is distributed here under the Artistic License. The licence
-texts are in [licenses/](licenses).
+Artistic License or the GPL), it is distributed here under the Artistic License. Perl's
+Unicode data (`lib/unicore` and the collation table in `libpl_Unicode_Collate.so`) is under
+the Unicode License v3. The licence texts are in [licenses/](licenses).
 
 | Component | Version | Licence | Source | Files |
 | --- | --- | --- | --- | ---: |

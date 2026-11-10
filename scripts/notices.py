@@ -19,21 +19,26 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 B = os.path.dirname(HERE)
 TARBALLS = sys.argv[2] if len(sys.argv) > 2 else os.path.join(B, "work/dl/pinned/cpan")
 LIC = os.path.join(B, "licenses")
+# The release this payload belongs to (build.sh passes BIBER_ANDROID_VERSION); a
+# development build names the pattern instead.
+_VERSION = os.environ.get("BIBER_ANDROID_VERSION", "")
+_V = _VERSION if _VERSION and not _VERSION.endswith("-dev") else "<version>"
+SOURCES_URL = ("https://github.com/LavishSonbhurra/biber-android/releases/download/"
+               f"v{_V}/biber-android-{_V}-sources.tar")
 
 # Licence as licenses.py writes it -> (what this distribution uses, text file or None).
 CHOSEN = {
     "Artistic-1.0-Perl OR GPL-1.0-or-later": ("the Artistic License 1.0 (Perl's terms)", "Artistic-1.0-Perl.txt"),
-    "artistic_1 / gpl_2": ("the Artistic License 1.0", "Artistic-1.0-Perl.txt"),
-    "BSD/Artistic/GPL (IPC-Run3: any of)": ("the Artistic License 1.0", "Artistic-1.0-Perl.txt"),
-    "MIT / bsd / artistic_1 / Artistic-2.0": ("the Artistic License 2.0", "Artistic-2.0.txt"),
+    "Artistic-1.0-Perl OR GPL-2.0-only": ("the Artistic License 1.0", "Artistic-1.0-Perl.txt"),
+    "BSD-3-Clause OR Artistic-1.0-Perl OR GPL-1.0-or-later": ("the Artistic License 1.0", "Artistic-1.0-Perl.txt"),
+    "MIT OR BSD-3-Clause OR Artistic-1.0-Perl OR Artistic-2.0": ("the Artistic License 2.0", "Artistic-2.0.txt"),
     "Artistic-2.0": ("the Artistic License 2.0", "Artistic-2.0.txt"),
     "Apache-2.0": ("the Apache License 2.0", "Apache-2.0.txt"),
-    "LGPL-2.1-or-later (library)": ("the GNU LGPL 2.1 or later", "LGPL-2.1.txt"),
+    "LGPL-2.1-or-later": ("the GNU LGPL 2.1 or later", "LGPL-2.1.txt"),
     "Zlib": ("the zlib licence", "zlib.txt"),
-    "Unrestricted (XML-Writer)": ("no restrictions (its author's grant)", None),
 }
-PERL_UNICODE = ("Artistic-1.0-Perl OR GPL-1.0-or-later; lib/unicore and the collation table in "
-                "libpl_Unicode_Collate.so are Unicode data (Unicode-3.0)")
+# Perl's Unicode data (lib/unicore and the collation table in libpl_Unicode_Collate.so).
+PERL_UNICODE = "(Artistic-1.0-Perl OR GPL-1.0-or-later) AND Unicode-3.0"
 TITLES = {
     "Artistic-1.0-Perl.txt": "The Artistic License 1.0 (as distributed with Perl)",
     "Artistic-2.0.txt": "The Artistic License 2.0",
@@ -46,7 +51,7 @@ TITLES = {
 
 
 def mit_license(name, version):
-    """The LICENSE (or COPYRIGHT) file of an MIT-licensed CPAN dist."""
+    """The LICENSE (or COPYRIGHT) file of a CPAN dist whose own notice must be kept."""
     tb = os.path.join(TARBALLS, f"{name}-{version}.tar.gz")
     with tarfile.open(tb) as t:
         for m in t.getmembers():
@@ -73,6 +78,9 @@ for name, version, licence, source in rows:
     elif licence == "MIT":
         terms, texts = "the MIT licence (its notice below)", []
         own.append((name, mit_license(name, version)))
+    elif licence.startswith("LicenseRef-XML-Writer"):
+        terms, texts = "its own terms (its notice below)", []
+        own.append((name, mit_license(name, version)))
     elif licence in CHOSEN:
         terms, text = CHOSEN[licence]
         texts = [text] if text else []
@@ -92,10 +100,11 @@ out.append("biber 2.21 for Android, https://github.com/plk/biber\n\n"
            "on Perl 5.44 with the CPAN modules it needs, using Termux's builds of Perl,\n"
            "libxml2, zlib and libiconv (https://github.com/termux/termux-packages). None\n"
            "of their source was changed; the libraries were only renamed and relinked with\n"
-           "patchelf. Each release of https://github.com/LavishSonbhurra/biber-android\n"
-           "also carries the complete source of this build as one file\n"
-           "(biber-android-<version>-sources.tar). The components, their licences and\n"
-           "where to get their source:\n")
+           "patchelf.\n\n"
+           "The complete source of this build, every component below included, is one\n"
+           "file attached to the same GitHub release as the binaries:\n"
+           f"  {SOURCES_URL}\n\n"
+           "The components, their licences and where else to get their source:\n")
 out.append("\n".join(lines) + "\n")
 out.append("The GNU LGPL lets you replace libiconv with your own build: the library is\n"
            "libiconv.so in the app's native library folder, and its source is at the\n"
