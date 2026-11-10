@@ -3,10 +3,6 @@
 # secrets set, a tag also uploads the AAR to the Central Portal, where it waits for a
 # manual Publish.
 #
-# This workflow had not run when it was committed: it was written before the repository
-# was on GitHub, from the commands that build and check the payload locally
-# (docs/BUILDING.md). Expect fixes on its first run, then delete this paragraph.
-#
 # Jobs
 #   payload  ubuntu-24.04-arm. ./build.sh: Termux's root filesystem entered with sudo
 #            chroot (no emulator: the arm64 kernel runs Android's bionic binaries), 112

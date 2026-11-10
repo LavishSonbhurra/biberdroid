@@ -139,7 +139,7 @@ the work, with no emulator. Every download is pinned by SHA-256.
 ## Building from source
 
 You need an arm64 Linux host with sudo, curl, python3, patchelf, git and about 2 GB of disk.
-A GitHub `ubuntu-24.04-arm` runner should work.
+GitHub's `ubuntu-24.04-arm` runner is what CI uses.
 
 ```sh
 ./build.sh                 # payload in work/out, release files in work/dist
@@ -170,9 +170,9 @@ releases.
 
 ## Status
 
-The payload is built locally and passes the checks above on Android 9's bionic in a chroot,
-and an app built against the AAR packages it as required. Not yet verified: the GitHub Actions
-workflow, which has not run, and the AAR running inside an app on a device.
+Every push builds the payload on GitHub's arm64 runner and runs the checks above on
+Android 9's bionic in a chroot, and an app built against the AAR packages it as required.
+Not yet verified: the AAR running inside an app on a device.
 
 ## Licences
 
