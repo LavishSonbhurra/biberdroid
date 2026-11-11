@@ -121,7 +121,8 @@ the payload, can meet the licences of its components:
   name, so a user can rebuild it from that source and replace it, as the LGPL requires.
 - **Unchanged sources.** biber, Perl and the CPAN modules are not modified; the only changes
   to binaries are the patchelf edits listed in `scripts/package.py`, which `NOTICES.txt`
-  states.
+  states. This project's own `BiberNative.pm` answers one ExtUtils::MakeMaker method
+  (`MM->maybe_command`) in place of loading MakeMaker; MakeMaker's files are untouched.
 
 An app that uses the library should add `NOTICES.txt` to its licences screen, and keep a
 pointer to the release's sources file (or ship the sources itself) for libiconv.

@@ -12,6 +12,8 @@
  *   BIBER_NATIVE_DIR  where the libpl_*.so XS modules are. Default: the
  *                     folder of /proc/self/exe (nativeLibraryDir).
  *   BIBER_CACHE       optional folder for reusing results, see below.
+ *   BIBER_TIMING      1 prints where the time went on stderr when the run
+ *                     ends; an absolute path appends that line to a file.
  *
  * Started as tectonic-biber, it is Tectonic's external tool: Tectonic copies
  * the .bcf and the data files it names into an empty temporary folder, runs
@@ -455,12 +457,69 @@ static int in_tectonic_temp(void) {
     return strcmp(real_cwd, real_tmp) == 0;
 }
 
-static int run_perl(int argc, char **argv, const char *home) {
-    char inc[PATH_MAX], script[PATH_MAX];
+/* ---- timing (BIBER_TIMING) ---- */
+
+static double now_ms(void) {
+    struct timespec t;
+    clock_gettime(CLOCK_MONOTONIC, &t);
+    return t.tv_sec * 1e3 + t.tv_nsec / 1e6;
+}
+
+/* Processor time this process has used, in milliseconds. */
+static double cpu_ms(void) {
+    struct timespec t;
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t);
+    return t.tv_sec * 1e3 + t.tv_nsec / 1e6;
+}
+
+/* Milliseconds since this process was started (exec included), from /proc; -1 when unknown. */
+static double since_start_ms(void) {
+    char stat[1024];
+    int fd = open("/proc/self/stat", O_RDONLY | O_CLOEXEC);
+    if (fd < 0) return -1;
+    ssize_t n = read(fd, stat, sizeof stat - 1);
+    close(fd);
+    if (n <= 0) return -1;
+    stat[n] = '\0';
+    /* Field 22 (start time, in clock ticks since boot), counted after the command name. */
+    char *at = strrchr(stat, ')');
+    unsigned long long ticks = 0;
+    if (!at || sscanf(at + 1, " %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %*u %*u %*d %*d %*d %*d %*d %*d %llu", &ticks) != 1)
+        return -1;
+    struct timespec t;
+    if (clock_gettime(CLOCK_BOOTTIME, &t) != 0) return -1;
+    return t.tv_sec * 1e3 + t.tv_nsec / 1e6 - ticks * 1e3 / sysconf(_SC_CLK_TCK);
+}
+
+/*
+ * BIBER_TIMING=1 prints one line on stderr when the run ends; an absolute
+ * path appends the line to that file instead.
+ */
+static void timing_report(const char *line) {
+    const char *to = getenv("BIBER_TIMING");
+    if (!to || !*to || strcmp(to, "0") == 0) return;
+    FILE *f = to[0] == '/' ? fopen(to, "a") : stderr;
+    if (!f) return;
+    fprintf(f, "biber-timing: %s\n", line);
+    if (f != stderr) fclose(f); else fflush(f);
+}
+
+/* ---- perl ---- */
+
+struct phase {
+    double wall, cpu;
+};
+
+static struct phase phase_now(void) {
+    struct phase p = {now_ms(), cpu_ms()};
+    return p;
+}
+
+/* perl -I$HOME/lib -MBiberNative $HOME/bin/biber ARGS..., compiled but not yet run. True when it compiled. */
+static int perl_compile(int argc, char **argv, const char *home) {
+    static char inc[PATH_MAX], script[PATH_MAX];
     snprintf(inc, sizeof inc, "-I%s/lib", home);
     snprintf(script, sizeof script, "%s/bin/biber", home);
-
-    /* perl -I$HOME/lib -MBiberNative $HOME/bin/biber ARGS... */
     int nargc = argc + 3;
     char **nargv = calloc(nargc + 1, sizeof *nargv);
     nargv[0] = argv[0];
@@ -474,12 +533,33 @@ static int run_perl(int argc, char **argv, const char *home) {
     PERL_SYS_INIT3(&nargc, &nargv, &env);
     my_perl = perl_alloc();
     perl_construct(my_perl);
+    /*
+     * As perlmain.c. perl_construct asks for a full teardown at exit, which
+     * frees every value one by one (0.15 s here); the perl program, and so
+     * the official biber, runs END blocks and destructors and lets the
+     * process exit take the memory.
+     */
+    PL_perl_destruct_level = 0;
     PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
-    /* As perlmain.c: perl_destruct gives the exit status, including exit(N). */
-    if (!perl_parse(my_perl, xs_init, nargc, nargv, env)) perl_run(my_perl);
+    return !perl_parse(my_perl, xs_init, nargc, nargv, env);
+}
+
+static int run_perl(int argc, char **argv, const char *home) {
+    double before_main = since_start_ms();
+    struct phase p0 = phase_now();
+    int compiled = perl_compile(argc, argv, home);
+    struct phase p1 = phase_now();
+    if (compiled) perl_run(my_perl);
+    struct phase p2 = phase_now();
     int status = perl_destruct(my_perl);
     perl_free(my_perl);
     PERL_SYS_TERM();
+    struct phase p3 = phase_now();
+    char line[240];
+    snprintf(line, sizeof line, "start %.0f ms, compile %.0f ms (cpu %.0f), run %.0f ms (cpu %.0f), exit %.0f ms (cpu %.0f), total %.0f ms",
+             before_main, p1.wall - p0.wall, p1.cpu - p0.cpu, p2.wall - p1.wall, p2.cpu - p1.cpu,
+             p3.wall - p2.wall, p3.cpu - p2.cpu, before_main + p3.wall - p0.wall);
+    timing_report(line);
     return status;
 }
 

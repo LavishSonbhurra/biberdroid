@@ -60,8 +60,9 @@ one inside termux-docker). Nothing from that `/system` ships.
 | `perl-tree.tar.xz`, `perl-tree.sha256` | `assets/biber` as a reproducible ustar in xz, and its SHA-256. |
 | `manifest.tsv`, `FILES.tsv`, `COMPONENTS.tsv`, `NOTICES.txt` | Every shipped file, where it came from, and the licences. |
 
-No source of biber, Perl or any CPAN module is changed. The ELF files from Termux are changed
-only with patchelf:
+No source of biber, Perl or any CPAN module is changed (`src/BiberNative.pm`, described
+below, answers one ExtUtils::MakeMaker method in its own file). The ELF files from Termux are
+changed only with patchelf:
 
 - `RUNPATH` removed.
 - Versioned names made APK-safe: `libxml2.so.16` becomes `libxml216.so` and `libz.so.1`
@@ -80,7 +81,9 @@ name at run time: every collation locale, charnames and Encode's modules.
 
 `src/BiberNative.pm` replaces `XSLoader::load` and `DynaLoader::bootstrap`: module `Foo::Bar`
 is loaded from `$BIBER_NATIVE_DIR/libpl_Foo_Bar.so`, and Perl's usual lookup is the fallback.
-It also drops Termux's prefix from `@INC`.
+It also drops Termux's prefix from `@INC`, and answers the one question biber's start-up puts
+to ExtUtils::MakeMaker (is this file a command, for its `kpsewhich` lookup) itself, with
+MakeMaker's own test, so that MakeMaker is not loaded for it (0.05 s of every run).
 
 The launcher's environment:
 
@@ -89,6 +92,7 @@ The launcher's environment:
 | `BIBER_HOME` | The Perl tree. | The folder above the one holding `argv[0]`, so a link at `BIBER_HOME/bin/tectonic-biber` needs no variable. |
 | `BIBER_NATIVE_DIR` | Where the `libpl_*.so` files are. | The folder of `/proc/self/exe`, which is `nativeLibraryDir`. |
 | `BIBER_CACHE` | Optional folder for reusing results in Tectonic mode. | None. |
+| `BIBER_TIMING` | `1` prints one line on stderr saying where the run's time went (`start`, `compile`, `run`, `exit` and `total`, in milliseconds); an absolute path appends the line to that file. | None. |
 | `LD_LIBRARY_PATH` | Must hold `nativeLibraryDir`, for `libperl.so`. | |
 
 Started under the name `tectonic-biber`, the launcher acts as Tectonic's external tool. After

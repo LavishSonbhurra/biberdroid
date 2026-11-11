@@ -45,4 +45,17 @@ sub _native {
         return $r ? $r->[-1] : $bootstrap->(@_);
     };
 }
+
+# biber asks IPC::Cmd::can_run whether kpsewhich is installed on every run,
+# and can_run loads all of ExtUtils::MakeMaker (0.07 s) for one method,
+# MM->maybe_command, whose Unix version is the line below. Answering it here
+# keeps MakeMaker out of the run; nothing else in the tree uses MakeMaker.
+unless ($INC{'ExtUtils/MakeMaker.pm'}) {
+    $INC{'ExtUtils/MakeMaker.pm'} = __FILE__;
+    *MM::maybe_command = sub {
+        my ($self, $file) = @_;
+        return $file if -x $file && !-d $file;
+        return;
+    };
+}
 1;

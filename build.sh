@@ -34,7 +34,8 @@
 # (GitHub's ubuntu-24.04-arm runners qualify). About 2 GB of disk; under 10 minutes on
 # a 2-core VM once the downloads are in place.
 #
-# No source of biber, Perl or any CPAN module is changed. The shipped ELF files
+# No source of biber, Perl or any CPAN module is changed (src/BiberNative.pm answers
+# one ExtUtils::MakeMaker method itself). The shipped ELF files
 # are Termux's builds, changed only with patchelf (RUNPATH removed, versioned
 # names made APK-safe, libandroid-utimes.so dropped from NEEDED); see
 # scripts/package.py.
