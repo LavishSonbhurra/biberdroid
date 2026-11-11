@@ -112,7 +112,7 @@ public class BiberVersion internal constructor(
     /** Consistent with [equals]. */
     override fun hashCode(): Int = biber.hashCode() * 31 + payload.hashCode()
 
-    /** `biber 2.21, payload 191d653cadd0`: the release and the first 12 digits of the hash. */
+    /** `biber 2.21, payload 4aab141542bb`: the release and the first 12 digits of the hash. */
     override fun toString(): String = "biber $biber, payload ${payload.take(12)}"
 }
 

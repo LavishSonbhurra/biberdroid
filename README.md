@@ -180,12 +180,22 @@ details.
   versioned names made APK-safe and their `RUNPATH` removed by patchelf.
 - The compiled parts of Perl modules ship as `libpl_<Module>.so`.
   [src/BiberNative.pm](src/BiberNative.pm) makes Perl load them from `nativeLibraryDir` instead
-  of its usual `auto/` folders.
+  of its usual `auto/` folders. It also answers one ExtUtils::MakeMaker method that biber's
+  start-up calls, so that MakeMaker is not loaded; no file of biber, Perl or CPAN is changed.
 - The rest, biber and the pure-Perl modules, is the Perl tree.
 
 The build runs inside Termux's root filesystem on an arm64 Linux host with `sudo chroot`.
 The Linux kernel runs Android's bionic binaries directly, so Termux's own Perl and clang do
 the work, with no emulator. Every download is pinned by SHA-256.
+
+## Performance
+
+A biber run on a small document takes 0.91 s, down from 1.08 s in 2.21-1 (about 16 percent
+less), with nothing to set up. Both are medians of 15 runs, taken in turns, in the
+Android-like test root on an Ampere Altra core, not on a phone, so expect other absolute
+times on a device. Over half of a run is Perl compiling biber's modules. `BIBER_TIMING` (see
+[docs/BUILDING.md](docs/BUILDING.md#what-is-shipped-and-how-it-is-made)) reports where a
+run's time went.
 
 ## Building from source
 
@@ -216,8 +226,9 @@ releases.
   work.
 - DateTime's per-locale data and most time zones are left out. biber only uses UTC, floating
   times and fixed offsets, and never a DateTime locale.
-- Each run starts Perl, which takes about a second (measured on an Ampere Altra core). The
-  `tectonic-biber` cache skips runs whose input has not changed.
+- Each run starts Perl and compiles biber's modules, which takes a little under a second
+  (see [Performance](#performance)). The `tectonic-biber` cache skips runs whose input has
+  not changed.
 
 ## Status
 

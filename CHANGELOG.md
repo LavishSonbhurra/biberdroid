@@ -2,11 +2,29 @@
 
 ## 2.21-2
 
-The payload is unchanged: the same biber 2.21, the same libraries and the same Perl tree,
-byte for byte. The Perl tree's SHA-256, which is also the installed tree's version, is
-still `191d653cadd09d857eee949330fc4d189372caef6d6ec6be0e757f43f69da170`. An app that
-updates from 2.21-1 keeps the tree it already unpacked and only checks its link.
-`NOTICES.txt` differs only in the address of the sources file, which names this release.
+The same biber 2.21, Perl and CPAN modules, with no source of theirs changed, and the same
+Termux libraries byte for byte. Two files of this project's own changed: the launcher
+(`libbiber.so`, 16.8 KB instead of 15.1 KB) and `lib/BiberNative.pm` in the Perl tree. The Perl
+tree's SHA-256, which is also the installed tree's version, is now
+`4aab141542bb1251368c5c9cd49d8e41beb05c5d5edd6ff919ad88b0931ae33b` (2.21-1:
+`191d653c...`), so an app that updates from 2.21-1 unpacks the tree once more on the first
+`Biber.install`. The sizes are as before: 46 libraries of 11.8 MB and a tree of 12.5 MB in a
+2.1 MB `.tar.xz`. The `.bbl` files are still byte-identical to the official biber's and
+biber's 1264 tests pass. `NOTICES.txt` otherwise differs only in the address of the sources
+file, which names this release.
+
+Faster runs, with nothing to set up:
+
+- A run on a small document takes 0.91 s instead of 1.08 s, about 16 percent less (medians
+  of 15 runs each, taken in turns, in the Android-like test root on an Ampere Altra core,
+  not on a phone).
+- The launcher now ends a run as the `perl` program does (END blocks and destructors, then
+  the process exits) instead of freeing every value first: about 0.13 s.
+- `BiberNative.pm` answers the one ExtUtils::MakeMaker method that biber's start-up calls
+  (`MM->maybe_command`, for its `kpsewhich` lookup), with MakeMaker's own test, so MakeMaker
+  is no longer loaded on every run: about 0.05 s. MakeMaker's files are not changed.
+- `BIBER_TIMING=1` prints one line on standard error saying where a run's time went (start,
+  compile, run, exit); an absolute path appends the line to that file instead.
 
 Added to the Android library, all source and binary compatible with 2.21-1:
 

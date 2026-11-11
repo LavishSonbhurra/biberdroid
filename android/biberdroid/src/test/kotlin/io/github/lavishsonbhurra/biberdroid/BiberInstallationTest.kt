@@ -113,12 +113,12 @@ class BiberInstallationTest {
 
     @Test
     fun versionsCompareByReleaseAndPayload() {
-        val hash = "191d653cadd09d857eee949330fc4d189372caef6d6ec6be0e757f43f69da170"
+        val hash = "4aab141542bb1251368c5c9cd49d8e41beb05c5d5edd6ff919ad88b0931ae33b"
         val a = BiberVersion("2.21", hash)
         assertEquals(a, BiberVersion("2.21", hash))
         assertEquals(a.hashCode(), BiberVersion("2.21", hash).hashCode())
         assertNotEquals(a, BiberVersion("2.21", "0$hash".take(64)))
-        assertEquals("biber 2.21, payload 191d653cadd0", a.toString())
+        assertEquals("biber 2.21, payload 4aab141542bb", a.toString())
     }
 
     private fun sh(script: String): Process {
