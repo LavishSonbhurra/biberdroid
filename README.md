@@ -54,7 +54,7 @@ android {
 }
 
 dependencies {
-    implementation("io.github.lavishsonbhurra:biberdroid:2.21-1")
+    implementation("io.github.lavishsonbhurra:biberdroid:2.21-2")
 }
 ```
 
@@ -74,22 +74,77 @@ that the launcher was installed into `nativeLibraryDir` (it is not on a device w
 arm64-v8a, or when native libraries are not extracted), and `Biber.notices(context)` returns
 the licence notices for your app's licences screen.
 
+To start the process yourself (to cancel it, change its priority, add variables or read the
+output as it comes), take the same setup as a `ProcessBuilder`. It installs first if needed,
+and an optional map adds variables to biber's environment:
+
+```kotlin
+val process = Biber.processBuilder(context, workDir, listOf("main")).start()
+// Read process.inputStream to the end, then waitFor(), or destroy() to stop it.
+```
+
+For diagnostics, `Biber.shippedVersion(context)` gives the biber release and the SHA-256 of
+the Perl tree in the app, and `Biber.installedVersion(context)` the one unpacked, or null.
+Neither installs anything, but like every call here they read files: make them from a
+background thread.
+
 ### With Tectonic
 
 Tectonic runs `tectonic-biber` from `PATH` whenever a document uses biblatex.
 `Biber.install` creates that name as a link to the launcher, and `applyTo` sets up the
-environment:
+environment. `Biber.installation` describes the installation without unpacking anything, so
+it is cheap enough for every compile:
 
 ```kotlin
-val biber = Biber.install(context)
+// Once, before the first document that needs biber: a second or two the first time,
+// then it only checks that everything is in place.
+Biber.install(context)
+
+// For every compile.
+val biber = Biber.installation(context)
 val tex = ProcessBuilder(tectonicPath, "main.tex").directory(projectDir)
 // Puts biber's bin folder on PATH and nativeLibraryDir on LD_LIBRARY_PATH.
 biber.applyTo(tex.environment())
 ```
 
+`biber.isCurrent` tells whether the install is complete for this version of the app.
+
 Started as `tectonic-biber`, the launcher also removes the `.bib` copies Tectonic made for it,
 which Tectonic would otherwise write back into the document's folder. With a cache folder,
 `biber.applyTo(env, cacheDir)`, it reuses the previous result when the input has not changed.
+
+### If your app ships zlib or libiconv too
+
+The library brings `libz1.so` and `libiconv.so`. If a library module or another dependency
+of the app has different files of the same names, the build stops with "2 files found with
+path 'lib/arm64-v8a/libz1.so'". Tell Gradle to package one copy:
+
+```kotlin
+android {
+    packaging {
+        jniLibs {
+            pickFirsts += listOf("**/libz1.so", "**/libiconv.so")
+        }
+    }
+}
+```
+
+Byte-identical copies are merged without it, and a copy in the app module's own `jniLibs`
+replaces the library's without a word. In every case one copy ships, and biber's
+`libxml216.so` and `libpl_XML_LibXML.so` load that one, as your code does. This is safe only
+when either copy can stand in for the other:
+
+- Both are arm64-v8a builds for Android with the soname matching the file name (`libz1.so`,
+  `libiconv.so`), aligned for 16 KB pages, and need nothing but Android's `libc`.
+- The packaged copy provides everything the other side calls. biberdroid's are Termux's
+  `zlib` 1.4 and `libiconv` 1.19.1 (see [pins.txt](pins.txt)), changed only by removing
+  their `RUNPATH`. The same Termux builds are the safe choice; another build of the same or a
+  newer release usually works but has not been tested with biber.
+- Gradle does not promise which copy it takes, so do not rely on the order.
+
+biber's own checks run against biberdroid's copies. If yours differ, run biber on a test
+document on a device before you ship, and check the copies again when you update either side.
+`libiconv.so` stays a separate library either way, as its licence requires.
 
 ### Without Gradle: the release files
 
@@ -107,7 +162,7 @@ plain files:
 | `SHA256SUMS` | checksums of all of the above |
 
 ```sh
-tar -xzf biberdroid-2.21-1-jniLibs-arm64-v8a.tar.gz -C app/src/main
+tar -xzf biberdroid-2.21-2-jniLibs-arm64-v8a.tar.gz -C app/src/main
 ```
 
 Unpack the Perl tree to a folder of the app's own at run time, then start
@@ -169,6 +224,7 @@ releases.
 Every push builds the payload on GitHub's arm64 runner and runs the checks above on
 Android 9's bionic in a chroot, and an app built against the AAR packages it as required.
 Not yet verified: the AAR running inside an app on a device.
+What changed in each release is in [CHANGELOG.md](CHANGELOG.md).
 
 ## Licences
 

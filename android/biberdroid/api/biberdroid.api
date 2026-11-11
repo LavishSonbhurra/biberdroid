@@ -1,0 +1,69 @@
+public final class io/github/lavishsonbhurra/biberdroid/Biber {
+	public static final field BIBLATEX_VERSION Ljava/lang/String;
+	public static final field DEFAULT_TIMEOUT_MILLIS J
+	public static final field INSTANCE Lio/github/lavishsonbhurra/biberdroid/Biber;
+	public static final field TECTONIC_TOOL Ljava/lang/String;
+	public static final field VERSION Ljava/lang/String;
+	public static final fun install (Landroid/content/Context;)Lio/github/lavishsonbhurra/biberdroid/BiberInstallation;
+	public static final fun install (Landroid/content/Context;Ljava/io/File;)Lio/github/lavishsonbhurra/biberdroid/BiberInstallation;
+	public static synthetic fun install$default (Landroid/content/Context;Ljava/io/File;ILjava/lang/Object;)Lio/github/lavishsonbhurra/biberdroid/BiberInstallation;
+	public static final fun installation (Landroid/content/Context;)Lio/github/lavishsonbhurra/biberdroid/BiberInstallation;
+	public static final fun installation (Landroid/content/Context;Ljava/io/File;)Lio/github/lavishsonbhurra/biberdroid/BiberInstallation;
+	public static synthetic fun installation$default (Landroid/content/Context;Ljava/io/File;ILjava/lang/Object;)Lio/github/lavishsonbhurra/biberdroid/BiberInstallation;
+	public static final fun installedVersion (Landroid/content/Context;)Ljava/lang/String;
+	public static final fun installedVersion (Landroid/content/Context;Ljava/io/File;)Ljava/lang/String;
+	public static synthetic fun installedVersion$default (Landroid/content/Context;Ljava/io/File;ILjava/lang/Object;)Ljava/lang/String;
+	public static final fun isSupported (Landroid/content/Context;)Z
+	public static final fun launcher (Landroid/content/Context;)Ljava/io/File;
+	public static final fun notices (Landroid/content/Context;)Ljava/lang/String;
+	public static final fun processBuilder (Landroid/content/Context;Ljava/io/File;Ljava/util/List;)Ljava/lang/ProcessBuilder;
+	public static final fun processBuilder (Landroid/content/Context;Ljava/io/File;Ljava/util/List;Ljava/util/Map;)Ljava/lang/ProcessBuilder;
+	public static synthetic fun processBuilder$default (Landroid/content/Context;Ljava/io/File;Ljava/util/List;Ljava/util/Map;ILjava/lang/Object;)Ljava/lang/ProcessBuilder;
+	public static final fun run (Landroid/content/Context;Ljava/io/File;Ljava/util/List;)Lio/github/lavishsonbhurra/biberdroid/BiberResult;
+	public static final fun run (Landroid/content/Context;Ljava/io/File;Ljava/util/List;J)Lio/github/lavishsonbhurra/biberdroid/BiberResult;
+	public static final fun run (Landroid/content/Context;Ljava/io/File;Ljava/util/List;JLjava/util/Map;)Lio/github/lavishsonbhurra/biberdroid/BiberResult;
+	public static synthetic fun run$default (Landroid/content/Context;Ljava/io/File;Ljava/util/List;JLjava/util/Map;ILjava/lang/Object;)Lio/github/lavishsonbhurra/biberdroid/BiberResult;
+	public static final fun shippedVersion (Landroid/content/Context;)Lio/github/lavishsonbhurra/biberdroid/BiberVersion;
+}
+
+public final class io/github/lavishsonbhurra/biberdroid/BiberInstallation {
+	public final fun applyTo (Ljava/util/Map;)V
+	public final fun applyTo (Ljava/util/Map;Ljava/io/File;)V
+	public static synthetic fun applyTo$default (Lio/github/lavishsonbhurra/biberdroid/BiberInstallation;Ljava/util/Map;Ljava/io/File;ILjava/lang/Object;)V
+	public final fun command (Ljava/util/List;)Ljava/util/List;
+	public final fun getBinDir ()Ljava/io/File;
+	public final fun getHome ()Ljava/io/File;
+	public final fun getInstalledVersion ()Ljava/lang/String;
+	public final fun getLauncher ()Ljava/io/File;
+	public final fun getNativeLibraryDir ()Ljava/io/File;
+	public final fun getTectonicTool ()Ljava/io/File;
+	public final fun getVersion ()Ljava/lang/String;
+	public final fun isCurrent ()Z
+	public final fun isInstalled ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/lavishsonbhurra/biberdroid/BiberResult {
+	public fun <init> (ILjava/lang/String;Z)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Z
+	public final fun copy (ILjava/lang/String;Z)Lio/github/lavishsonbhurra/biberdroid/BiberResult;
+	public static synthetic fun copy$default (Lio/github/lavishsonbhurra/biberdroid/BiberResult;ILjava/lang/String;ZILjava/lang/Object;)Lio/github/lavishsonbhurra/biberdroid/BiberResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getExitCode ()I
+	public final fun getOutput ()Ljava/lang/String;
+	public final fun getSucceeded ()Z
+	public final fun getTimedOut ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/lavishsonbhurra/biberdroid/BiberVersion {
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBiber ()Ljava/lang/String;
+	public final fun getPayload ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+

@@ -9,7 +9,8 @@
 #            CPAN dists, biber and its 1264 tests, packaging, then the checks in an
 #            Android-like root.
 #   library  ubuntu-24.04 (x86_64, because Android's aapt2 is x86_64-only). The AAR from
-#            the payload, and its unit tests.
+#            the payload, its unit tests, and the check of its public API against
+#            android/biberdroid/api/biberdroid.api.
 #   sign     tags only; does nothing without the secrets. Builds the publication again with
 #            Gradle signing, checks that its AAR is byte-identical to the library job's,
 #            and packs the Central bundle. It runs before the release, so a mismatch
@@ -137,7 +138,7 @@ jobs:
         working-directory: android
         run: |
           ./gradlew --no-daemon -PbiberdroidVersion="$BIBERDROID_VERSION" \
-            :biberdroid:testReleaseUnitTest :biberdroid:assembleRelease
+            :biberdroid:testReleaseUnitTest :biberdroid:checkLegacyAbi :biberdroid:assembleRelease
           mkdir -p ../aar
           cp biberdroid/build/outputs/aar/biberdroid-release.aar "../aar/biberdroid-$BIBERDROID_VERSION.aar"
 

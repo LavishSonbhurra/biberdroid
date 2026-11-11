@@ -28,11 +28,16 @@ are `2.21-dev`.
 
 ## A release
 
+Before tagging, add the release to [CHANGELOG.md](../CHANGELOG.md) and update the version
+shown in the README. If the library's public API changed on purpose, `android/biberdroid/api/biberdroid.api`
+must already be updated (see [BUILDING.md](BUILDING.md#the-android-library)); CI fails
+otherwise.
+
 Push a tag:
 
 ```sh
-git tag -a v2.21-1 -m "biberdroid 2.21-1"
-git push origin v2.21-1
+git tag -a v2.21-2 -m "biberdroid 2.21-2"
+git push origin v2.21-2
 ```
 
 `.github/workflows/build.yml` then builds and checks the payload, builds the AAR, and

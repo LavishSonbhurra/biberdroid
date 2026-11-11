@@ -126,13 +126,19 @@ from the folder named by the Gradle property `biber.payload` or the environment 
 
 ```sh
 cd android
-./gradlew :biberdroid:testReleaseUnitTest :biberdroid:assembleRelease
+./gradlew :biberdroid:testReleaseUnitTest :biberdroid:checkLegacyAbi :biberdroid:assembleRelease
 ```
 
 The AAR is in `android/biberdroid/build/outputs/aar/`. Needs JDK 17 and the Android SDK
 (platform 36, build tools 35). Android's `aapt2` is an x86_64 program, so on an arm64 Linux
 host it has to run under qemu-user with an x86_64 sysroot (`QEMU_LD_PREFIX`); CI builds the
 library on an x86_64 runner instead.
+
+`checkLegacyAbi` compares the public API with `android/biberdroid/api/biberdroid.api` and
+fails on any difference, so a change that would break apps built against an earlier release
+cannot slip in. After a deliberate change, run `./gradlew :biberdroid:updateLegacyAbi` and
+commit the file. Additions are compatible; removing or changing a published symbol is not,
+so deprecate instead.
 
 ## Using the payload directly
 
@@ -151,7 +157,9 @@ Without the library, an app does what `Biber.install` does:
    `LD_LIBRARY_PATH=nativeLibraryDir`, or put `filesDir/biber/bin` on Tectonic's `PATH`.
 
 If the app also ships its own `libz1.so` or `libiconv.so` (a Termux build of Tectonic, say),
-they must be the same Termux builds as the ones pinned here.
+only one copy of each can be packaged; the README's
+[section on zlib and libiconv](../README.md#if-your-app-ships-zlib-or-libiconv-too) says when
+that is safe.
 
 ## Pins and the download mirror
 
@@ -184,6 +192,7 @@ header has the binary's URL and checksum.
 | `src/` | The launcher and the module loader. |
 | `scripts/` | Build, packaging, licence and check scripts. |
 | `tests/` | Test documents, fixtures and the data model test. |
-| `android/` | The Android library (Gradle). |
+| `android/` | The Android library (Gradle); `android/biberdroid/api/` holds its recorded public API. |
+| `CHANGELOG.md` | What changed in each release. |
 | `licenses/` | Licence texts of the components. |
 | `.github/workflows/build.yml` | CI and releases. |

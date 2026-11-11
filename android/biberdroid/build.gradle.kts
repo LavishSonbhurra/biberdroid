@@ -81,6 +81,13 @@ kotlin {
     }
     coreLibrariesVersion = "2.1.21"
     explicitApi()
+    // The public API is recorded in api/biberdroid.api. checkLegacyAbi (part of check, and
+    // run by CI) fails when it changes; after a deliberate change, run updateLegacyAbi and
+    // commit the file. Removing or changing a published symbol breaks apps built against it.
+    @OptIn(org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation::class)
+    abiValidation {
+        enabled.set(true)
+    }
 }
 
 dependencies {
@@ -218,6 +225,8 @@ signing {
         sign(publishing.publications)
     }
 }
+
+tasks.named("check") { dependsOn("checkLegacyAbi") }
 
 // TarTest.readsThePayloadTree reads the real Perl tree.
 tasks.withType<Test>().configureEach {
