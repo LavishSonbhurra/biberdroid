@@ -34,8 +34,11 @@ public class BiberInstallation internal constructor(
     public val isInstalled: Boolean get() = installedVersion != null
 
     /**
-     * Whether [Biber.install] would have nothing to do: the tree in [home] is the version
-     * this library ships, and `bin/tectonic-biber` points at this install's [launcher].
+     * Whether the tree in [home] is the version this library ships and `bin/tectonic-biber`
+     * points at this install's [launcher], which must exist. When true, [Biber.install]
+     * neither unpacks nor relinks; it may still remove what a killed install left beside
+     * the tree. It turns false after an app update moves `nativeLibraryDir`, until the
+     * next [Biber.install].
      */
     public val isCurrent: Boolean = current
 
@@ -46,10 +49,7 @@ public class BiberInstallation internal constructor(
      * [installedVersion] when a tree is installed, and the version an install would write
      * when none is.
      */
-    @Deprecated(
-        "Ambiguous before an install. Use installedVersion, or Biber.shippedVersion(context).payload.",
-        ReplaceWith("installedVersion"),
-    )
+    @Deprecated("Ambiguous before an install. Use installedVersion, or Biber.shippedVersion(context).payload.")
     public val version: String get() = installedVersion ?: shippedPayload
 
     /** Holds the `tectonic-biber` link; put it on `PATH` for Tectonic. */
@@ -67,14 +67,17 @@ public class BiberInstallation internal constructor(
      * `LD_LIBRARY_PATH`, and `BIBER_HOME`. With [cacheDir], `BIBER_CACHE` too: started as
      * `tectonic-biber`, the launcher then reuses an earlier result for identical input
      * without starting Perl. The cache folder is made when needed and holds at most 8
-     * results. Entries already on `PATH` or `LD_LIBRARY_PATH` are kept, after the new one.
+     * results. Entries already on `PATH` or `LD_LIBRARY_PATH` are kept, after the new one,
+     * except empty ones, which would stand for the current folder. A `PATH` that is missing
+     * or has no entries becomes `/system/bin`.
      *
      * It only sets variables, so it works on an object from [Biber.installation] as well:
      * when no tree is installed yet, Tectonic simply finds no `tectonic-biber`.
      */
     @JvmOverloads
     public fun applyTo(env: MutableMap<String, String>, cacheDir: File? = null) {
-        env["PATH"] = prepend(binDir.absolutePath, env["PATH"] ?: "/system/bin")
+        val path = env["PATH"]?.takeIf { p -> p.split(':').any { it.isNotEmpty() } } ?: "/system/bin"
+        env["PATH"] = prepend(binDir.absolutePath, path)
         env["LD_LIBRARY_PATH"] = prepend(nativeLibraryDir.absolutePath, env["LD_LIBRARY_PATH"])
         env["BIBER_HOME"] = home.absolutePath
         if (cacheDir != null) env["BIBER_CACHE"] = cacheDir.absolutePath
@@ -84,12 +87,9 @@ public class BiberInstallation internal constructor(
     override fun toString(): String =
         "BiberInstallation(home=$home, launcher=$launcher, installedVersion=$installedVersion, isCurrent=$isCurrent)"
 
-    /** [dir], then the entries of [list] other than [dir]. An empty entry would mean the current folder. */
-    private fun prepend(dir: String, list: String?): String {
-        if (list.isNullOrEmpty()) return dir
-        val rest = list.split(':').filter { it != dir }
-        return if (rest.isEmpty()) dir else dir + ":" + rest.joinToString(":")
-    }
+    /** [dir], then the entries of [list] other than [dir] and other than empty ones (the current folder). */
+    private fun prepend(dir: String, list: String?): String =
+        (listOf(dir) + list.orEmpty().split(':').filter { it.isNotEmpty() && it != dir }).joinToString(":")
 }
 
 /**

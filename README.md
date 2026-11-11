@@ -93,21 +93,21 @@ background thread.
 Tectonic runs `tectonic-biber` from `PATH` whenever a document uses biblatex.
 `Biber.install` creates that name as a link to the launcher, and `applyTo` sets up the
 environment. `Biber.installation` describes the installation without unpacking anything, so
-it is cheap enough for every compile:
+it is cheap enough for every compile. For every compile, off the main thread:
 
 ```kotlin
-// Once, before the first document that needs biber: a second or two the first time,
-// then it only checks that everything is in place.
-Biber.install(context)
-
-// For every compile.
-val biber = Biber.installation(context)
+// install() unpacks only when this version's tree is missing (a second or two), and
+// repairs the link after an app update; otherwise installation() is all it takes.
+val biber = Biber.installation(context).let { if (it.isCurrent) it else Biber.install(context) }
 val tex = ProcessBuilder(tectonicPath, "main.tex").directory(projectDir)
 // Puts biber's bin folder on PATH and nativeLibraryDir on LD_LIBRARY_PATH.
 biber.applyTo(tex.environment())
 ```
 
-`biber.isCurrent` tells whether the install is complete for this version of the app.
+`installation` never repairs anything: an app update moves `nativeLibraryDir`, which leaves
+the `tectonic-biber` link pointing at the old launcher, and `isCurrent` then stays false
+until `Biber.install` runs. So call `install` at least once after each app start, or
+whenever `isCurrent` is false, as above.
 
 Started as `tectonic-biber`, the launcher also removes the `.bib` copies Tectonic made for it,
 which Tectonic would otherwise write back into the document's folder. With a cache folder,

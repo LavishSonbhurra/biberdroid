@@ -150,6 +150,50 @@ class TreesTest {
         assertFalse(Trees.freshDir(home).exists())
     }
 
+    /** The state after a kill between the two renames of TreeSwap.swap: only biber.old is whole. */
+    private fun killedMidSwap() {
+        install("v1")
+        assertTrue(home.renameTo(Trees.oldDir(home)))
+        leave(Trees.freshDir(home))
+    }
+
+    @Test
+    fun describePutsTheOldTreeBackAfterAKillMidSwap() {
+        killedMidSwap()
+        val biber = Trees.describe(home, launcher, "v1")
+        assertTrue(biber.isCurrent)
+        assertEquals("biber v1", File(home, "bin/biber").readText())
+        assertFalse(Trees.oldDir(home).exists())
+        assertFalse(Trees.freshDir(home).exists())
+    }
+
+    @Test
+    fun installPutsTheOldTreeBackAfterAKillMidSwap() {
+        killedMidSwap()
+        val biber = Trees.install(home, launcher, "v1") { throw AssertionError("unpacked again") }
+        assertTrue(biber.isCurrent)
+        assertFalse(Trees.oldDir(home).exists())
+    }
+
+    @Test
+    fun anIncompleteOldTreeIsNotPutBack() {
+        home.parentFile!!.mkdirs()
+        File(Trees.oldDir(home), "lib").mkdirs()
+        Trees.describe(home, launcher, "v1")
+        assertFalse(home.exists())
+        assertFalse(Trees.oldDir(home).exists())
+    }
+
+    @Test
+    fun anOldTreeBesideAnInstalledOneIsDeleted() {
+        install("v2")
+        install("v1")
+        File(Trees.oldDir(home), "bin").mkdirs()
+        File(Trees.oldDir(home), Trees.MARKER).writeText("v2")
+        assertEquals("v1", Trees.describe(home, launcher, "v1").installedVersion)
+        assertFalse(Trees.oldDir(home).exists())
+    }
+
     @Test
     fun describeRemovesLeftoversWhenNoInstallRuns() {
         install("v1")

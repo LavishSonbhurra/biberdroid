@@ -12,7 +12,9 @@ Added to the Android library, all source and binary compatible with 2.21-1:
 
 - `Biber.installation(context, home)` describes the installation without unpacking anything:
   its paths, the installed version, and whether it is current. `applyTo` works on it, so an
-  app can set up the environment for every compile without installing first.
+  app can set up the environment for every compile without installing first. It repairs
+  nothing: after an app update `isCurrent` is false until `Biber.install` relinks
+  `tectonic-biber`, so call `install` whenever `isCurrent` is false (the README shows how).
 - `Biber.shippedVersion(context)` returns a `BiberVersion` (the biber release and the SHA-256
   of the Perl tree in the app), and `Biber.installedVersion(context, home)` the version
   unpacked, or null. Neither installs anything.
@@ -28,10 +30,14 @@ Changed:
 - What an install that was killed halfway leaves beside the tree (`biber.unpacking`,
   `biber.old`, a half-made link) is now removed by the next `Biber.install`, and by
   `Biber.installation` when no install is running, instead of only by the next unpack.
+  When the kill came between the two renames that swap the trees, so that only
+  `biber.old` holds a complete tree, it is moved back instead of deleted.
 - `Biber.install` no longer keeps a list of homes it checked: when everything is in place it
   reads the version marker and the link, without taking the lock.
-- `applyTo` no longer leaves an empty entry (`dir:`) on `PATH` or `LD_LIBRARY_PATH` when the
-  variable held only its own folder. An empty entry stands for the current folder.
+- `applyTo` no longer leaves or keeps empty entries on `PATH` or `LD_LIBRARY_PATH` (2.21-1
+  wrote `dir:` when the variable held only its own folder), since an empty entry stands for
+  the current folder. A `PATH` that is set but empty is treated like a missing one
+  (`/system/bin`).
 - biber's standard input now reads from `/dev/null` instead of a closed pipe.
 
 Documentation and build:

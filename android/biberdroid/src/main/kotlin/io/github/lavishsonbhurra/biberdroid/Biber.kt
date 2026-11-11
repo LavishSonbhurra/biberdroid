@@ -89,8 +89,13 @@ public object Biber {
      * installing first. It works on a device without biber too ([isSupported] false); the
      * installation is then never current.
      *
-     * When an earlier install was killed halfway, this also removes the folder it left
-     * behind, unless an install is running in this process or another.
+     * When an earlier install was killed halfway, this also cleans up after it, unless an
+     * install is running in this process or another: it removes the half-made folders, and
+     * puts the previous tree back if the kill came while the trees were being swapped.
+     *
+     * The description does not repair anything else. After an app update moves
+     * `nativeLibraryDir`, the `tectonic-biber` link is stale and [BiberInstallation.isCurrent]
+     * is false until [install] runs again.
      *
      * @throws IOException when the app was packaged without the library's assets.
      */

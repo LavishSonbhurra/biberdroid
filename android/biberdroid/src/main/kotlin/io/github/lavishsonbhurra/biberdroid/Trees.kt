@@ -85,9 +85,10 @@ internal object Trees {
     }
 
     /**
-     * Removes the [leftovers] of a killed install, but only when no install holds the lock,
-     * in this process or another; otherwise it leaves them to that install. Cheap when there
-     * is nothing to remove: a few file checks, and no lock file is made.
+     * Clears the [leftovers] of a killed install (see [removeLeftovers]), but only when no
+     * install holds the lock, in this process or another; otherwise it leaves them to that
+     * install. Cheap when there is nothing to remove: a few file checks, and no lock file
+     * is made.
      */
     fun cleanIfIdle(home: File) {
         if (!hasLeftovers(home) || !inProcess.tryLock()) return
@@ -107,9 +108,16 @@ internal object Trees {
         }
     }
 
+    /**
+     * Deletes the [leftovers], except that a complete tree in `biber.old` is moved back
+     * when [home] is missing: that is the state after a kill between the two renames of
+     * [TreeSwap.swap], or a swap that could not put the old tree back.
+     */
     private fun removeLeftovers(home: File) {
         freshDir(home).deleteRecursively()
-        oldDir(home).deleteRecursively()
+        val old = oldDir(home)
+        if (!home.exists() && !Files.isSymbolicLink(home.toPath()) && readMarker(old) != null) old.renameTo(home)
+        old.deleteRecursively()
         toolTmp(home).delete()
     }
 

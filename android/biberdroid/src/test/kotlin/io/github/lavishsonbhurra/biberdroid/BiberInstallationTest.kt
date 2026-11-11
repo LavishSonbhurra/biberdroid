@@ -46,6 +46,35 @@ class BiberInstallationTest {
     }
 
     @Test
+    fun applyToDropsEmptyEntries() {
+        val bin = "${home.path}/bin"
+        val lib = launcher.parent!!
+        val cases = mapOf(
+            "/x:" to "$bin:/x",
+            ":/x" to "$bin:/x",
+            "/x::/y" to "$bin:/x:/y",
+            "$bin::$bin:/x:" to "$bin:/x",
+        )
+        for ((given, want) in cases) {
+            val env = mutableMapOf("PATH" to given, "LD_LIBRARY_PATH" to given.replace(bin, lib))
+            biber.applyTo(env)
+            assertEquals(given, want, env["PATH"])
+            assertEquals(given, want.replace(bin, lib), env["LD_LIBRARY_PATH"])
+        }
+    }
+
+    @Test
+    fun anEmptyPathIsTreatedAsMissing() {
+        val bin = "${home.path}/bin"
+        for (given in listOf("", ":", "::")) {
+            val env = mutableMapOf("PATH" to given, "LD_LIBRARY_PATH" to given)
+            biber.applyTo(env)
+            assertEquals("PATH '$given'", "$bin:/system/bin", env["PATH"])
+            assertEquals("LD_LIBRARY_PATH '$given'", launcher.parent, env["LD_LIBRARY_PATH"])
+        }
+    }
+
+    @Test
     fun pathsAndCommand() {
         assertEquals(File(home, "bin"), biber.binDir)
         assertEquals(File(home, "bin/tectonic-biber"), biber.tectonicTool)
