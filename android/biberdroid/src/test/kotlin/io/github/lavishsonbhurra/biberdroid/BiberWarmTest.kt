@@ -65,8 +65,10 @@ class BiberWarmTest {
     fun closeEndsTheProcessByItsStandardInput() {
         val warm = BiberWarm.start(launcher(wellBehaved), mapOf("PATH" to "/usr/bin:/bin"), 0)
         assertTrue(warm.awaitReady(5_000))
+        assertFalse(warm.awaitEnd(100))
         warm.close()
         warm.close()
+        assertTrue(warm.awaitEnd(5_000))
         assertTrue(awaitEnd())
         // It ended by itself, having seen the end of its input: it was not killed.
         assertEquals("ended", seen.readLines().last())
@@ -98,7 +100,7 @@ class BiberWarmTest {
     @Test
     fun ensureRunningRightAfterCloseStartsANewProcess() {
         // Slow to end, as a process that finishes a run: the new one does not wait for that.
-        val slow = wellBehaved + "\nsleep 2"
+        val slow = wellBehaved + "\nsleep 5"
         val warm = BiberWarm.start(launcher(slow), mapOf("PATH" to "/usr/bin:/bin"), 0)
         assertTrue(warm.awaitReady(5_000))
         warm.close()
@@ -107,7 +109,7 @@ class BiberWarmTest {
         val start = System.nanoTime()
         warm.ensureRunning()
         assertTrue(warm.awaitReady(5_000))
-        assertTrue((System.nanoTime() - start) / 1_000_000 < 1_500)
+        assertTrue((System.nanoTime() - start) / 1_000_000 < 3_500)
         assertTrue(warm.isAlive)
         assertTrue("BIBER_WARM=${warm.address}" in seen.readLines())
         warm.close()

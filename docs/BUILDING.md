@@ -93,7 +93,7 @@ The launcher's environment:
 | `BIBER_HOME` | The Perl tree. | The folder above the one holding `argv[0]`, so a link at `BIBER_HOME/bin/tectonic-biber` needs no variable. |
 | `BIBER_NATIVE_DIR` | Where the `libpl_*.so` files are. | The folder of `/proc/self/exe`, which is `nativeLibraryDir`. |
 | `BIBER_CACHE` | Optional folder for reusing results in Tectonic mode. | None. |
-| `BIBER_WARM` | Optional address of [a warm process](#the-warm-process) that does the run: `@name` or an absolute path. | None. |
+| `BIBER_WARM` | Optional address of [a warm process](#the-warm-process) that does the run: `@name`. | None. |
 | `BIBER_WARM_WAIT` | Milliseconds a run waits for the warm process to take it before it runs on its own. | 3000 |
 | `BIBER_WARM_IDLE` | For the warm process: seconds without a run after which it ends; 0 for no limit. | 0 |
 | `BIBER_TIMING` | `1` prints one line on stderr saying where the run's time went (`start`, `compile`, `run`, `exit` and `total`, in milliseconds; for a run a warm process did, `start`, `warm: taken after`, `run` and `total`, and for one it did not take, a line before that saying why); an absolute path appends the lines to that file. | None. |
@@ -120,7 +120,7 @@ termux-docker's Android 9 `/system`, an app uid (10234), the libraries in a mock
 | `scripts/datamodel-approot.sh` | `libbiber.so --validate-datamodel` under its own name, with `BIBER_HOME` set, reports the planted mistakes in `tests/datamodel`. |
 | `scripts/suite-approot.sh` | biber's own test suite (51 files, 1264 tests) against the packaged tree. |
 | `scripts/suite-forked-approot.sh` | The same suite, each test file in a child forked from a process that has already compiled the modules `bin/biber` loads, as a warm process's workers are. |
-| `scripts/warm-approot.sh` | [The warm process](#the-warm-process): the seven `.bbl` files byte-identical, with the output and exit status of a run on its own; a probe in biber's place (`tests/warm/probe.pl`) reports the same state and fails the same way in 32 cases (arguments, folder, environment, umask, priority, limits, signals, buffering, a closed pipe, a full disk, a read-only folder); how the process starts and ends, and what runs do when it is absent, stalled, stale or killed. |
+| `scripts/warm-approot.sh` | [The warm process](#the-warm-process): the seven `.bbl` files byte-identical, with the output and exit status of a run on its own; a probe in biber's place (`tests/warm/probe.pl`) reports the same state and fails the same way in 35 cases (arguments, folder, environment, umask, priority, limits, signals, buffering, a closed pipe, a full disk, a read-only folder); how the process starts and ends, and what runs do when it is absent, stalled, stale or killed. |
 | `scripts/warm-peers-approot.sh` | The warm process against peers that are not runs (another user's, nonsense, too much, nothing at all), something else at its address, and a soak: 200 biber runs (24 at once) and 300 probe runs with no descriptor, zombie or memory left over. |
 
 `./build.sh package` also runs `scripts/check-elf.py`: every library is aarch64, aligned for
@@ -182,13 +182,14 @@ price, so it is meant to live only as long as runs are likely (see below).
   their own.
 - A run never starts a warm process and never replaces one.
 
-**The address.** `@name` is a socket in Linux's abstract namespace: nothing in the file
-system, nothing to clean up, and the name is free the moment the process ends. An absolute
-path is a socket file (mode 0600), for systems where that suits better; the process removes
-its own file when it ends, and never takes over a file that is already there, so remove a
-file a killed process left before starting another at that path. Either way both sides check
-that the other runs as the same user (`SO_PEERCRED`), and on Android SELinux lets only
-processes of the same app connect to each other.
+**The address.** `@name` is a socket in Linux's abstract namespace, the only kind of
+address: nothing in the file system, nothing to clean up, and the name is free the moment
+the process gives it up (when it is told to end, also while it still compiles). The
+abstract namespace has no permissions: any process on the device that knows or guesses the
+name may connect to it, or listen there first. So the name should be unguessable
+(`Biber.warm` makes one from 128 random bits), and the guarantee is that both sides check
+that the other runs as the same user (`SO_PEERCRED`): the warm process drops any other
+client unread, and a run uses nothing but a process of its own user.
 
 **The same run.** A run that has `BIBER_WARM` in its environment asks the process there to
 do it; `BIBER_TIMING` shows who did. What makes such a run the run it would have been:
@@ -199,7 +200,8 @@ do it; `BIBER_TIMING` shows who did. What makes such a run the run it would have
   `BIBER_TIMING`, and the shell's `PWD`, `OLDPWD`, `SHLVL` and `_`. So anything that was set
   up through the environment when the process started, a preloaded library that reads its
   limits from variables say, was set up as for the run. `BIBER_HOME` and `BIBER_NATIVE_DIR`
-  must be absolute paths, and the tree must have its `.version` marker.
+  must be absolute paths, as must every entry of `PERL5LIB`, and the tree must have its
+  `.version` marker.
 - The worker takes on the rest of the run: its standard input, output and error (the
   descriptors themselves, so whoever reads the run's output to its end is not kept waiting
   by the warm process, and Perl buffers them as it would in a run), working folder,
@@ -223,10 +225,16 @@ with a closed standard descriptor always works on its own. After "go" the work i
 twice: if the warm process is killed then, its worker dies with it and the run ends as
 killed, with a message on standard error.
 
+All workers of one warm process share its Perl hash seed, where every run on its own has a
+new one. The seed places the keys of the hashes made while compiling, an order no run may
+rely on, since it differs between two runs on their own; the order of hashes made in a run
+is varied per worker.
+
 **Limits.** 16 runs at once; more wait in the queue and work on their own after
 `BIBER_WARM_WAIT`. A request (environment and arguments) may take 256 KiB. The process is
 single-threaded and does not block on any peer: a request must be complete within two
-seconds, and a peer that is another user's is dropped unread.
+seconds, a run must start the worker it was offered within two seconds, and a peer that is
+another user's is dropped unread.
 
 ## Using the payload directly
 

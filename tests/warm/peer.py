@@ -92,6 +92,26 @@ def server(kind, where):
             c.recv(65536)
             c.sendall(b"Zzz")
             c.close()
+        elif kind in ("dies-early", "dies-signalled"):
+            # As a warm process whose worker ended after it was offered and before "go".
+            head = b""
+            while len(head) < 8:
+                head += c.recv(8 - len(head))
+            left = struct.unpack("<II", head)[1]
+            while left > 0:
+                left -= len(c.recv(min(left, 65536)))
+            c.sendall(b"Q")
+            if kind == "dies-signalled":
+                # Not before the run has passed a signal on (K and its number, after its G).
+                seen = b""
+                while b"K" not in seen:
+                    more = c.recv(16)
+                    if not more:
+                        break
+                    seen += more
+            reason = b"the worker ended before the run began"
+            c.sendall(b"N" + bytes([len(reason)]) + reason)
+            c.close()
         else:
             # silent: the connection is kept and never answered
             kept.append(c)

@@ -72,9 +72,8 @@ public final class io/github/lavishsonbhurra/biberdroid/BiberVersion {
 }
 
 public final class io/github/lavishsonbhurra/biberdroid/BiberWarm : java/io/Closeable {
-	public static final field ENV_ADDRESS Ljava/lang/String;
-	public static final field ENV_IDLE Ljava/lang/String;
 	public final fun applyTo (Ljava/util/Map;)V
+	public final fun awaitEnd (J)Z
 	public final fun awaitReady (J)Z
 	public fun close ()V
 	public final fun ensureRunning ()V

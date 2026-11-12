@@ -83,6 +83,10 @@ fresh|served)
   try fulldisk sh -c "cd $W/full && $L fill=big; rm -f big"
   try gone sh -c "mkdir $W/gone && cd $W/gone && rmdir $W/gone && $L state"
   try by-name $FILES/probe/bin/tectonic-biber state
+  # Another environment than the warm process's: an extra variable, another value, one missing.
+  try env-extra env EXTRA=1 $L state
+  try env-changed env HOME=/elsewhere $L state
+  try env-missing sh -c "unset ANDROID_DATA; $L state"
   # Signals sent to the run from outside, while it works.
   for s in TERM INT HUP QUIT USR1 KILL; do
     try sent-$s sh -c "$L sleep=20 end & p=\$!; sleep 0.7; kill -$s \$p; wait \$p; echo status \$?"
@@ -93,6 +97,7 @@ fresh|served)
   cp $BIBER_TIMING $W/timing-$1.txt
   if [ $1 = served ]; then
     alive > $W/alive-probe.txt
+    ls /proc/$WARM/task | wc -l > $W/threads-probe.txt
     grep VmRSS /proc/$WARM/status > $W/rss-probe.txt
     warm_stop
   fi
@@ -150,21 +155,33 @@ life)
   sleep 1.6; note idle-later "$(alive)"
   warm_stop
 
-  # A socket file instead of an abstract name.
-  export BIBER_WARM=$O/warm.sock
-  ADDRESS=$BIBER_WARM warm_start path
-  before=$(took); $L lines=1 > /dev/null; note path-taken $(($(took) - before))
-  note path-mode "$(stat -c %a $O/warm.sock)"
+  # A path is not an address (only names in the abstract namespace are).
+  BIBER_WARM=$O/warm.sock $L --biberdroid-warm < /dev/null > path.out 2>&1; note path-status $?
+
+  # Its standard input ends while it still compiles (biber itself here): the address is free at
+  # once, and a successor started right away takes the runs.
+  export BIBER_HOME=$FILES/biber
+  rm -f $W/ctl; mkfifo $W/ctl
+  $L --biberdroid-warm < $W/ctl > $W/warm-cut.out 2>&1 &
+  cut=$!
+  exec 9> $W/ctl
+  sleep 0.15
+  exec 9>&-
+  sleep 0.05
+  warm_start biberdroid-life
+  note successor-ready "$(grep -c ready $W/warm-biberdroid-life.out)"
+  before=$(took); $L --version > successor.out; note successor-taken $(($(took) - before))
+  wait $cut; note cut-status $?
+  note cut-said "$(grep -c . $W/warm-cut.out)"
   warm_stop
-  note path-after-stop "$(ls $O | grep -c warm.sock)"
-  # A socket file left by a killed process: runs work on their own, and a new process does not take it over.
-  ADDRESS=$BIBER_WARM warm_start path
-  kill -KILL $WARM; wait $WARM 2>/dev/null; exec 9>&-
-  $L lines=1 > stale.out; note stale-run-status $?
-  $L --biberdroid-warm < /dev/null > stale-start.out 2>&1; note stale-start-status $?
-  note stale-file-kept "$(ls $O | grep -c warm.sock)"
-  rm -f $O/warm.sock
-  export BIBER_WARM=@biberdroid-life
+  export BIBER_HOME=$FILES/probe
+
+  # A relative PERL5LIB entry would mean another folder in a worker: no warm process, and no run handed over.
+  PERL5LIB=lib $L --biberdroid-warm < /dev/null > perl5lib.out 2>&1; note perl5lib-status $?
+  warm_start biberdroid-life
+  before=$(took); PERL5LIB=lib $L lines=1 > /dev/null; note perl5lib-run-status $?; note perl5lib-taken $(($(took) - before))
+  warm_stop
+
 
   # A run that comes while the warm process still compiles (biber itself here) is taken once it is ready.
   export BIBER_HOME=$FILES/biber
@@ -228,6 +245,13 @@ run)
   export BIBER_HOME=$FILES/probe BIBER_TIMING=$W/peers/$2.timing BIBER_WARM=$3
   [ -n "$4" ] && export BIBER_WARM_WAIT=$4
   $L lines=1 write=$W/peers/$2.txt > $W/peers/$2.out 2>&1; echo $? > $W/peers/$2.status
+  ;;
+
+run-signalled)
+  # As run, with SIGTERM sent to the run while it waits.
+  export BIBER_HOME=$FILES/probe BIBER_TIMING=$W/peers/$2.timing BIBER_WARM=$3
+  $L lines=1 write=$W/peers/$2.txt sleep=5 > $W/peers/$2.out 2>&1 &
+  p=$!; sleep 0.7; kill -TERM $p; wait $p; echo $? > $W/peers/$2.status
   ;;
 
 soak)

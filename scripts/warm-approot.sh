@@ -13,7 +13,7 @@
 #    process;
 #  - the warm process ends when told to, by its standard input, a signal or
 #    idleness, without cutting a run short; runs survive its absence, its
-#    death while idle, a stalled or stale one, and fail without redoing work
+#    death while idle or a stalled one, and fail without redoing work
 #    when it is killed under them.
 set -e
 B=$(cd "$(dirname "$0")/.." && pwd)
@@ -75,7 +75,7 @@ check "no worker outlives its run" "[ \$(sudo cat $A$H/alive-busy.txt) = 1 ]"
 check "the warm process ends with its standard input" "[ \$(sudo cat $A$H/alive-after.txt) = 0 ]"
 
 cases=$(sudo ls $A$H/fresh | sed -n 's/\.status$//p')
-check "the probe ran every case" "[ \$(echo \$cases | wc -w) = 32 ]"
+check "the probe ran every case" "[ \$(echo \$cases | wc -w) = 35 ]"
 for c in $cases; do
   [ $c = rand1 ] || [ $c = rand2 ] && continue
   same=1
@@ -85,8 +85,12 @@ for c in $cases; do
   done
   check "probe, $c: the same with a warm process" "[ $same = 1 ]"
 done
-# 32 cases: two with a closed descriptor, and five ended by a signal, which leave no timing line.
+# 35 cases: two with a closed descriptor, three with another environment, and five ended by a signal, which leave no timing line.
 check "the warm process took every case it can take" "[ \$(taken timing-served.txt) = 25 ] && [ \$(taken timing-fresh.txt) = 0 ]"
+for v in EXTRA HOME ANDROID_DATA; do
+  check "a run with another environment ($v) is refused and done on its own" "[ \$(sudo grep -c \"refused: the environment differs from the warm process's: $v\$\" $A$H/timing-served.txt) = 1 ]"
+done
+check "the warm process has one thread" "[ \$(sudo cat $A$H/threads-probe.txt) = 1 ]"
 check "a closed standard descriptor is left to the run itself" "[ \$(sudo grep -c 'a standard descriptor is closed' $A$H/timing-served.txt) = 2 ]"
 check "the report has the run's state" "has served/plain.out 'args: state|end|one|two words||four=4' && has served/plain.out 'cwd: .*/a folder' && has served/plain.out 'started: now'"
 check "the umask is the run's" "has served/umask.out 'umask: 0027' && has served/umask.out 'mode: 0640'"
@@ -115,11 +119,12 @@ check "and its work is not done again" "[ \$(sudo grep -c written $A$H/life/once
 check "killed while idle: the next run works on its own" "[ \"\$(note idle-killed-status)\" = 0 ] && [ \"\$(note idle-killed-taken)\" = 0 ] && has life/idle-killed.out 'line 1'"
 check "a warm process that does not answer: the run works on its own, once" "[ \"\$(note stalled-status)\" = 0 ] && [ \$(sudo grep -c written $A$H/life/stalled.txt) = 1 ] && [ \"\$(note after-stall-status)\" = 0 ]"
 check "an idle warm process ends, but not under a run" "[ \"\$(note idle-run-status)\" = 0 ] && [ \"\$(note idle-right-after)\" = 1 ] && [ \"\$(note idle-later)\" = 0 ]"
-check "a socket file works as an address, for its owner only, and is removed" "[ \"\$(note path-taken)\" = 1 ] && [ \"\$(note path-mode)\" = 600 ] && [ \"\$(note path-after-stop)\" = 0 ]"
-check "a stale socket file: runs work on their own, a new warm process leaves it alone" "[ \"\$(note stale-run-status)\" = 0 ] && [ \"\$(note stale-start-status)\" = 2 ] && [ \"\$(note stale-file-kept)\" = 1 ]"
 check "a run that comes while the warm process compiles is taken when it is ready" "[ \"\$(note early-status)\" = 0 ] && [ \"\$(note early-taken)\" = 1 ] && has life/early.out 'biber version' && has life/early.timing 'taken after [0-9][0-9][0-9]* ms'"
 check "a worker that cannot take on the run's limits leaves the run to itself, once" "[ \"\$(note limited-status)\" = 0 ] && [ \"\$(note limited-taken)\" = 0 ] && has life/limited.timing 'refused: setrlimit' && [ \$(sudo grep -c written $A$H/life/limited.txt) = 1 ]"
 check "a warm process whose standard input has ended does not start" "[ \"\$(note noinput-status)\" = 0 ] && ! sudo test -s $A$H/life/noinput.out"
+check "a path is not an address" "[ \"\$(note path-status)\" = 2 ] && has life/path.out 'must be @NAME'"
+check "input ended while compiling: the address is free at once and a successor serves" "[ \"\$(note successor-ready)\" = 1 ] && [ \"\$(note successor-taken)\" = 1 ] && [ \"\$(note cut-status)\" = 0 ] && [ \"\$(note cut-said)\" = 0 ]"
+check "a relative PERL5LIB: no warm process, and no run handed over" "[ \"\$(note perl5lib-status)\" = 2 ] && [ \"\$(note perl5lib-run-status)\" = 0 ] && [ \"\$(note perl5lib-taken)\" = 0 ]"
 check "no warm process without a version marker or with relative paths" "[ \"\$(note nomarker-status)\" = 2 ] && [ \"\$(note relative-status)\" = 2 ]"
 check "a replaced Perl tree is not served by the old warm process" "[ \"\$(note replaced-status)\" = 0 ] && [ \"\$(note replaced-taken)\" = 0 ]"
 check "no process is left" "[ \"\$(note end-leaves)\" = 0 ]"

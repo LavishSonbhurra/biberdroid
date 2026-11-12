@@ -7,6 +7,9 @@ import java.security.SecureRandom
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
+private const val ENV_ADDRESS = "BIBER_WARM"
+private const val ENV_IDLE = "BIBER_WARM_IDLE"
+
 /**
  * A warm biber process: the launcher with biber's Perl modules already compiled, which
  * does the runs that are handed to it. A run then takes about half as long, because over
@@ -33,8 +36,9 @@ import java.util.concurrent.TimeUnit
  * Objects of this class are safe to use from several threads.
  *
  * @property address the value of `BIBER_WARM` that leads a run to this process: a name in
- *   Linux's abstract socket namespace, made up for this object. Nothing is left in the
- *   file system, and only processes of the same app can connect.
+ *   Linux's abstract socket namespace, made up for this object from 128 random bits.
+ *   Nothing is left in the file system. The namespace itself keeps nobody out; the process
+ *   and each run check that the other side runs as the same user, and use nothing else.
  */
 public class BiberWarm internal constructor(
     private val launcher: File,
@@ -81,8 +85,10 @@ public class BiberWarm internal constructor(
             val current = run
             if (current != null && current.process.isAlive) {
                 if (!current.closed) return
-                // Told to end: it gives up the address at once and ends when its runs have.
-                // A moment for the first, so that the new process finds the address free.
+                // Told to end: it gives up the address as soon as it sees its input end, and
+                // ends when its runs have. Mostly it is gone at once; a moment for it, so that
+                // the new process finds the address free. Should it not (then the new one
+                // ends at once, and isAlive says so), the next call starts another.
                 try {
                     current.process.waitFor(GIVE_UP_MILLIS, TimeUnit.MILLISECONDS)
                 } catch (_: InterruptedException) {
@@ -156,6 +162,17 @@ public class BiberWarm internal constructor(
         return !run.closed && run.process.isAlive
     }
 
+    /**
+     * Waits until the process started last has ended, at most [timeoutMillis], and says
+     * whether it has: after [close], to see that its memory is free again. A process that
+     * still does a run ends when the run does. True when none was ever started.
+     */
+    @Throws(InterruptedException::class)
+    public fun awaitEnd(timeoutMillis: Long): Boolean {
+        val run = synchronized(this) { run } ?: return true
+        return run.process.waitFor(timeoutMillis, TimeUnit.MILLISECONDS)
+    }
+
     /** What the process printed last (a few lines at most), for logs: why it did not start, say. */
     public val output: String
         get() {
@@ -183,11 +200,9 @@ public class BiberWarm internal constructor(
     override fun toString(): String = "BiberWarm(address=$address, isAlive=$isAlive)"
 
     internal companion object {
-        const val ENV_ADDRESS = "BIBER_WARM"
-        const val ENV_IDLE = "BIBER_WARM_IDLE"
         private const val READY = "warm process ready"
         private const val KEPT_LINES = 8
-        private const val GIVE_UP_MILLIS = 300L
+        private const val GIVE_UP_MILLIS = 1000L
         private val CLIENT_ONLY =
             setOf(ENV_ADDRESS, "BIBER_WARM_WAIT", ENV_IDLE, "BIBER_CACHE", "BIBER_TIMING", "PWD", "OLDPWD", "SHLVL", "_")
         private val random = SecureRandom()

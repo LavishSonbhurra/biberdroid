@@ -5,7 +5,8 @@
 #    descriptors, or nothing at all (tests/warm/peer.py): each is dropped, none
 #    holds up a real run, none leaves a descriptor behind in the warm process;
 #  - something else listening at the address, another user's or one that
-#    never answers or answers nonsense: the run works on its own, once;
+#    never answers, answers nonsense, or loses its worker before the run
+#    said go: the run works on its own, once;
 #  - a soak: ROUNDS x 24 biber runs at once, ROW in a row and PROBES probe
 #    runs, every result right, with no descriptor, zombie or memory left over.
 set -e
@@ -56,6 +57,10 @@ as_app server silent @biberdroid-fake2 > $O/fake2.txt 2>&1 &
 sleep 0.5; inner run mute @biberdroid-fake2 400
 as_app server garbage @biberdroid-fake3 > $O/fake3.txt 2>&1 &
 sleep 0.5; inner run nonsense @biberdroid-fake3
+as_app server dies-early @biberdroid-fake4 > $O/fake4.txt 2>&1 &
+sleep 0.5; inner run worker-gone @biberdroid-fake4
+as_app server dies-signalled @biberdroid-fake5 > $O/fake5.txt 2>&1 &
+sleep 0.5; inner run-signalled worker-gone-signalled @biberdroid-fake5
 wait
 
 $B/scripts/approot.sh run "ROUNDS=$ROUNDS ROW=$ROW PROBES=$PROBES SLOTS='$slots' sh $H/inner.sh soak" || true
@@ -80,6 +85,8 @@ check "and the warm process serves again when they are gone" "once after-crowd &
 check "no descriptor of a peer stays in the warm process" "[ \$(sudo cat $A$H/fds-before.txt) = \$(sudo cat $A$H/fds-after.txt) ]"
 check "another user's process at the address is not used" "once other-user && has peers/other-user.timing 'is not this user'"
 check "a process that never answers is not waited for" "once mute && has peers/mute.timing 'did not take the run in time'"
+check "a worker gone between its offer and the run's go: the run is done on its own, once" "once worker-gone && has peers/worker-gone.timing 'the worker ended before the run began'"
+check "and a signal the run had passed on to it ends the run instead" "[ \$(sudo cat \$P/worker-gone-signalled.status) = 143 ] && ! sudo test -e \$P/worker-gone-signalled.txt"
 check "a process that answers nonsense is not used" "once nonsense && has peers/nonsense.timing 'warm process not used: refused'"
 
 runs=$((ROUNDS * 24 + ROW))

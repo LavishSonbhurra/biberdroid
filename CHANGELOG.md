@@ -4,13 +4,13 @@
 
 The same biber 2.21, Perl, CPAN modules and Termux libraries, and the same Perl tree byte for
 byte (SHA-256 `4aab1415...`, so an app updating from 2.21-2 does not unpack it again). Only
-the launcher changed (`libbiber.so`, 39.0 KB instead of 16.8 KB). Runs that do not use the
+the launcher changed (`libbiber.so`, 39.9 KB instead of 16.8 KB). Runs that do not use the
 new feature are done by the same code as before.
 
 A warm process, for biber runs in half the time (experimental until checked on a device):
 
 - `libbiber.so --biberdroid-warm` compiles biber's Perl modules once, listens at the address
-  in `BIBER_WARM` (a name in Linux's abstract socket namespace, or a socket file) and forks a
+  in `BIBER_WARM` (a name in Linux's abstract socket namespace) and forks a
   worker for each run handed to it. A run with `BIBER_WARM` in its environment hands itself
   over: its standard descriptors, working folder, arguments, environment, umask, resource
   limits, priority and signal settings. A run on a small document takes 0.43 s instead of
@@ -19,7 +19,7 @@ A warm process, for biber runs in half the time (experimental until checked on a
   it holds 79 MB while it waits.
 - A run a warm process did is the run it would have been on its own: the seven test
   documents give byte-identical `.bbl` files with the same output and exit status, and a
-  probe in biber's place reports the same state and fails the same way in 32 cases
+  probe in biber's place reports the same state and fails the same way in 35 cases
   (`scripts/warm-approot.sh`). biber's 1264 tests also pass in children forked from a process
   that compiled biber first (`scripts/suite-forked-approot.sh`).
 - A run that cannot be handed over is done as before: no process at the address, another
@@ -40,8 +40,8 @@ Added to the Android library, source and binary compatible with 2.21-2:
 - `Biber.warm(context, environment, idleSeconds)` starts a warm process for runs with that
   environment and returns a `BiberWarm`: `applyTo(env)` names it in a compile's environment,
   `ensureRunning()` starts it again after it ended (at the same address), `serves(env)` says
-  whether a compile's runs would be handed over, `awaitReady`, `isAlive`, `output` and
-  `close()`. `Biber.DEFAULT_WARM_IDLE_SECONDS` is 300.
+  whether a compile's runs would be handed over, `awaitReady`, `awaitEnd`, `isAlive`,
+  `output` and `close()`. `Biber.DEFAULT_WARM_IDLE_SECONDS` is 300.
 
 ## 2.21-2
 

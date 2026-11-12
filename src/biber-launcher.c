@@ -41,8 +41,8 @@
  * Over half of a run is perl compiling biber's modules, the same work every
  * time. "libbiber.so --biberdroid-warm" is a warm process: it compiles biber
  * once, listens on the address in BIBER_WARM ("@name", a socket in Linux's
- * abstract namespace, which leaves nothing in the file system, or an absolute
- * path) and forks a worker for each run that asks. A run started with the
+ * abstract namespace, which leaves nothing in the file system) and forks a
+ * worker for each run that asks. A run started with the
  * same BIBER_WARM, under any name, hands itself to that process: its standard
  * descriptors, working folder, arguments, environment, umask, resource
  * limits, priority and signal settings. The worker takes them all on and
@@ -684,18 +684,26 @@ static int warm_identity(const char *home, char id[65]) {
     return 1;
 }
 
-/* "@name" is a socket in the abstract namespace, "/path" one in the file system. 0 for anything else. */
+/* "@name" is a socket in Linux's abstract namespace, the only kind of address. 0 for anything else. */
 static socklen_t warm_address(const char *text, struct sockaddr_un *addr) {
     memset(addr, 0, sizeof *addr);
     addr->sun_family = AF_UNIX;
     size_t n = text ? strlen(text) : 0;
-    if (n >= 2 && text[0] == '@' && n <= sizeof addr->sun_path) {
-        memcpy(addr->sun_path + 1, text + 1, n - 1);
-        return (socklen_t)(offsetof(struct sockaddr_un, sun_path) + n);
-    }
-    if (n >= 2 && text[0] == '/' && n < sizeof addr->sun_path) {
-        memcpy(addr->sun_path, text, n + 1);
-        return (socklen_t)sizeof *addr;
+    if (n < 2 || text[0] != '@' || n > sizeof addr->sun_path) return 0;
+    memcpy(addr->sun_path + 1, text + 1, n - 1);
+    return (socklen_t)(offsetof(struct sockaddr_un, sun_path) + n);
+}
+
+/* PERL5LIB or PERLLIB with an entry that is not an absolute path: it would mean another folder after a chdir. */
+static int relative_library(void) {
+    static const char *const names[] = {"PERL5LIB", "PERLLIB"};
+    for (size_t i = 0; i < sizeof names / sizeof names[0]; i++) {
+        const char *list = getenv(names[i]);
+        while (list && *list) {
+            if (*list != '/' && *list != ':') return 1;
+            list = strchr(list, ':');
+            if (list) list++;
+        }
     }
     return 0;
 }
@@ -906,7 +914,15 @@ static void work(struct served *r, pid_t parent) {
 
     PL_basetime = time(NULL);
 #ifdef PERL_HASH_RANDOMIZE_KEYS
-    /* The order of a new hash's keys differs from run to run, as between two perls. */
+    /*
+     * The order of a new hash's keys differs from run to run, as between two
+     * perls. The hash seed itself is the warm process's, the same in all its
+     * workers, where every perl started on its own has a new one: it places
+     * the keys of the hashes made while compiling, which no run may depend
+     * on, since it differs from one ordinary run to the next. The seed is not
+     * known to whoever supplies biber's input, and a new warm process has a
+     * new one.
+     */
     struct timespec t;
     clock_gettime(CLOCK_MONOTONIC, &t);
     PL_hash_rand_bits ^= (UV)t.tv_nsec * 2654435761u ^ (UV)getpid() << 16;
@@ -969,6 +985,12 @@ static void take_request(struct served *r) {
         return;
     }
 
+    /* A run that gave up waiting (while we compiled, say) has closed its end: no worker for it. */
+    char peek;
+    if (recv(r->client, &peek, 1, MSG_PEEK | MSG_DONTWAIT) == 0) {
+        drop_run(r);
+        return;
+    }
     int pair[2];
     if (socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, pair) != 0) {
         refuse(r, "no socket pair for a worker");
@@ -1060,6 +1082,7 @@ static void read_sync(struct served *r) {
     if (n >= 1 && msg[0] == 'k') {
         if (r->client >= 0 && write_all(r->client, "Q", 1) == 0) {
             r->state = R_OFFERED;
+            r->deadline = now_ms() + WARM_REQUEST_MS;
             return;
         }
         n = 0;
@@ -1128,14 +1151,32 @@ static void reap(void) {
     }
 }
 
-static void stop_listening(const struct sockaddr_un *addr, const struct stat *bound) {
+static void stop_listening(void) {
     if (warm_listener < 0) return;
     close(warm_listener);
     warm_listener = -1;
-    struct stat st;
-    /* Our own socket file only: not one a later process put there. */
-    if (addr->sun_path[0] == '/' && lstat(addr->sun_path, &st) == 0 && st.st_dev == bound->st_dev && st.st_ino == bound->st_ino)
-        unlink(addr->sun_path);
+}
+
+static volatile sig_atomic_t compiling;
+
+/*
+ * SIGIO for our standard input while perl compiles, when the loop below is
+ * not there to see its end: the address is given up at once, so that a
+ * successor can take it, and the loop stops when it starts.
+ */
+static void on_input(int sig) {
+    (void)sig;
+    int saved = errno;
+    struct pollfd input = {0, POLLIN, 0};
+    char drain[256];
+    if (poll(&input, 1, 0) > 0 && (!(input.revents & POLLIN) || read(0, drain, sizeof drain) == 0)) {
+        if (compiling && warm_listener >= 0) {
+            close(warm_listener);
+            warm_listener = -1;
+        }
+        stop_asked = 1;
+    }
+    errno = saved;
 }
 
 /* The warm process itself: "libbiber.so --biberdroid-warm". */
@@ -1144,7 +1185,7 @@ static int warm_main(char *arg0, const char *home) {
     struct sockaddr_un addr;
     socklen_t addr_size = warm_address(text, &addr);
     if (!addr_size) {
-        fprintf(stderr, "biber: BIBER_WARM must be @NAME or an absolute path of at most %d bytes\n", (int)sizeof addr.sun_path - 1);
+        fprintf(stderr, "biber: BIBER_WARM must be @NAME, of at most %d bytes\n", (int)sizeof addr.sun_path);
         return 2;
     }
     if (home[0] != '/' || !native || native[0] != '/') {
@@ -1155,21 +1196,24 @@ static int warm_main(char *arg0, const char *home) {
         fprintf(stderr, "biber: a warm process needs the Perl tree's version marker, %s/.version\n", home);
         return 2;
     }
+    if (relative_library()) {
+        fprintf(stderr, "biber: a warm process needs absolute paths in PERL5LIB\n");
+        return 2;
+    }
     /* Perl opens its standard handles on 0 to 2 while compiling: all three must be open. */
     for (int fd = 0; fd < 3; fd++) {
         if (fcntl(fd, F_GETFD) < 0 && open("/dev/null", O_RDWR) != fd) return 2;
     }
     const char *idle_text = getenv("BIBER_WARM_IDLE");
-    int idle = idle_text ? atoi(idle_text) : 0;
+    long idle_given = idle_text ? atol(idle_text) : 0;
+    /* At most a million seconds, which as milliseconds still fits poll's int. */
+    int idle = idle_given < 0 ? 0 : idle_given > 1000000 ? 1000000 : (int)idle_given;
 
     warm_listener = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC | SOCK_NONBLOCK, 0);
-    struct stat bound = {0};
-    /* An address in use is never taken over: its owner may be alive. */
+    /* An address in use is never taken over: its owner is alive. */
     if (warm_listener < 0 || bind(warm_listener, (struct sockaddr *)&addr, addr_size) != 0 ||
-        (addr.sun_path[0] == '/' && (chmod(addr.sun_path, 0600) != 0 || lstat(addr.sun_path, &bound) != 0)) ||
         listen(warm_listener, WARM_RUNS) != 0) {
         fprintf(stderr, "biber: cannot listen at %s: %s\n", text, strerror(errno));
-        if (bound.st_ino) unlink(addr.sun_path);
         return 2;
     }
     if (pipe2(wake_pipe, O_CLOEXEC | O_NONBLOCK) != 0) return 2;
@@ -1177,7 +1221,7 @@ static int warm_main(char *arg0, const char *home) {
     struct pollfd input = {0, POLLIN, 0};
     char byte;
     if (poll(&input, 1, 0) > 0 && (!(input.revents & POLLIN) || read(0, &byte, 1) == 0)) {
-        stop_listening(&addr, &bound);
+        stop_listening();
         return 0;
     }
 
@@ -1194,6 +1238,19 @@ static int warm_main(char *arg0, const char *home) {
     for (int sig = 1; sig <= WARM_SIGNALS; sig++) {
         if (ignored_at_start >> (sig - 1) & 1) signal(sig, SIG_DFL);
     }
+    /* All but SIGIO for our standard input, which perl has no use for (see on_input). */
+    struct sigaction io, io_before;
+    memset(&io, 0, sizeof io);
+    io.sa_handler = on_input;
+    io.sa_flags = SA_RESTART;
+    sigfillset(&io.sa_mask);
+    sigaction(SIGIO, &io, &io_before);
+    int input_flags = fcntl(0, F_GETFL);
+    int watched = input_flags >= 0 && fcntl(0, F_SETOWN, getpid()) == 0 && fcntl(0, F_SETFL, input_flags | O_ASYNC) == 0;
+    compiling = 1;
+    sigset_t but_io = all;
+    sigdelset(&but_io, SIGIO);
+    sigprocmask(SIG_SETMASK, &but_io, NULL);
     int n = 0;
     while (environ[n]) n++;
     char **copy = malloc((n + 1) * sizeof *copy);
@@ -1205,6 +1262,11 @@ static int warm_main(char *arg0, const char *home) {
     char *argv[] = {arg0, NULL};
     int compiled = perl_compile(1, argv, home);
     if (compiled) PerlIO_flush(NULL);
+    sigprocmask(SIG_SETMASK, &all, NULL);
+    compiling = 0;
+    if (watched) fcntl(0, F_SETFL, input_flags);
+    signal(SIGIO, SIG_IGN);   /* drops one that is waiting */
+    sigaction(SIGIO, &io_before, NULL);
     for (int sig = 1; sig <= WARM_SIGNALS; sig++) sigaction(sig, NULL, &perl_signals[sig]);
     struct sigaction sa;
     memset(&sa, 0, sizeof sa);
@@ -1217,10 +1279,10 @@ static int warm_main(char *arg0, const char *home) {
     signal(SIGPIPE, SIG_IGN);
     sigprocmask(SIG_SETMASK, &none, NULL);
     if (!compiled) {
-        stop_listening(&addr, &bound);
+        stop_listening();
         return 1;
     }
-    dprintf(1, "biber: warm process ready at %s, compiled in %.0f ms\n", text, now_ms() - t0);
+    if (!stop_asked) dprintf(1, "biber: warm process ready at %s, compiled in %.0f ms\n", text, now_ms() - t0);
 
     int watch_input = 1, stopping = 0, busy = 0;
     double idle_since = now_ms();
@@ -1233,7 +1295,7 @@ static int warm_main(char *arg0, const char *home) {
         }
         if (stopping) {
             /* No new runs; requests not yet taken go back to their runs, those under way finish. */
-            stop_listening(&addr, &bound);
+            stop_listening();
             for (int i = 0; i < run_count;) {
                 if (runs[i].state == R_REQUEST) drop_run(&runs[i]); else i++;
             }
@@ -1251,7 +1313,7 @@ static int warm_main(char *arg0, const char *home) {
             struct served *r = &runs[i];
             if (r->client >= 0) { owner[count] = r; fds[count].fd = r->client; fds[count++].events = POLLIN; }
             if (r->state == R_SETUP) { owner[count] = r; fds[count].fd = r->sync; fds[count++].events = POLLIN; }
-            if (r->state == R_REQUEST && (until < 0 || r->deadline < until)) until = r->deadline;
+            if ((r->state == R_REQUEST || r->state == R_OFFERED) && (until < 0 || r->deadline < until)) until = r->deadline;
         }
         if (run_count == 0 && idle > 0 && !stopping) until = idle_since + idle * 1e3;
         int ready = poll(fds, count, until < 0 ? -1 : until <= now ? 0 : (int)(until - now) + 1);
@@ -1260,7 +1322,20 @@ static int warm_main(char *arg0, const char *home) {
         if (ready <= 0) {
             if (run_count == 0 && idle > 0 && now >= idle_since + idle * 1e3) stopping = 1;
             for (int i = 0; i < run_count;) {
-                if (runs[i].state == R_REQUEST && now >= runs[i].deadline) drop_run(&runs[i]); else i++;
+                struct served *r = &runs[i];
+                if (r->state == R_REQUEST && now >= r->deadline) {
+                    drop_run(r);
+                    continue;
+                }
+                /* A run that was offered its worker and does not say "go": the worker is not kept for it. */
+                if (r->state == R_OFFERED && now >= r->deadline) {
+                    kill(r->pid, SIGKILL);
+                    refuse(r, "the run did not start the worker in time");
+                    close(r->sync);
+                    r->sync = -1;
+                    r->state = R_ABANDONED;
+                }
+                i++;
             }
             continue;
         }
@@ -1308,7 +1383,7 @@ static int warm_main(char *arg0, const char *home) {
             }
         }
     }
-    stop_listening(&addr, &bound);
+    stop_listening();
     /* The compiled perl is dropped with the process: nothing ran in it. */
     return 0;
 }
@@ -1316,9 +1391,11 @@ static int warm_main(char *arg0, const char *home) {
 /* -- the run's side -- */
 
 static int forward_to = -1;
+static volatile sig_atomic_t forwarded;   /* the last signal passed on */
 
 static void on_forward(int sig) {
     int saved = errno;
+    forwarded = sig;
     unsigned char msg[2] = {'K', (unsigned char)sig};
     if (send(forward_to, msg, sizeof msg, MSG_NOSIGNAL | MSG_DONTWAIT) < 0) { /* the warm process is gone: the run ends anyway */ }
     errno = saved;
@@ -1372,8 +1449,8 @@ static int warm_run(const char *address, int argc, char **argv, const char *home
     struct warm_run run;
     memset(&run, 0, sizeof run);
     const char *native = getenv("BIBER_NATIVE_DIR");
-    if (!addr_size || home[0] != '/' || !native || native[0] != '/' || !warm_identity(home, run.identity)) {
-        snprintf(why, why_size, "no usable address, absolute BIBER_HOME and BIBER_NATIVE_DIR, or version marker");
+    if (!addr_size || home[0] != '/' || !native || native[0] != '/' || relative_library() || !warm_identity(home, run.identity)) {
+        snprintf(why, why_size, "no usable address, absolute BIBER_HOME, BIBER_NATIVE_DIR and PERL5LIB, or version marker");
         return -1;
     }
     double t0 = now_ms();
@@ -1479,14 +1556,22 @@ static int warm_run(const char *address, int argc, char **argv, const char *home
         if (!(ignored >> (passed[i] - 1) & 1)) sigaction(passed[i], &sa, NULL);
     }
     int32_t result[2];
-    int told = write_all(fd, "G", 1) == 0 && read_until(fd, &reply, 1, -1) == 0;
-    if (told && reply == 'N') {
-        /* The worker ended before it was told to go: nothing was done, so the run is done here. */
+    /*
+     * "Go". If that cannot even be written, the warm process has closed its
+     * end and no worker was told to go; if it answers N, the worker ended
+     * before it was told (the answer may be waiting behind a closed
+     * connection). Either way nothing was done, and the run is done here.
+     */
+    int went = write_all(fd, "G", 1) == 0;
+    int told = read_until(fd, &reply, 1, -1) == 0;
+    if (!went || (told && reply == 'N')) {
         for (size_t i = 0; i < sizeof passed / sizeof passed[0]; i++) {
             if (!(ignored >> (passed[i] - 1) & 1)) signal(passed[i], SIG_DFL);
         }
-        snprintf(why, why_size, "the worker ended before the run began");
         close(fd);
+        /* A signal that was passed on reached no biber: it is this process's again. */
+        if (forwarded) raise(forwarded);
+        snprintf(why, why_size, "the worker ended before the run began");
         return -1;
     }
     if (!told || reply != 'S' || read_until(fd, result, sizeof result, -1) != 0) {
