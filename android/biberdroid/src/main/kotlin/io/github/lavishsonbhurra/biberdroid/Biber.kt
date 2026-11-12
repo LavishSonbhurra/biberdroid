@@ -41,6 +41,9 @@ public object Biber {
     /** The default timeout of [run]: 2 minutes. */
     public const val DEFAULT_TIMEOUT_MILLIS: Long = 120_000
 
+    /** The default idle time of [warm]: 5 minutes. */
+    public const val DEFAULT_WARM_IDLE_SECONDS: Int = 300
+
     /** The shipped tree's SHA-256, read once: assets do not change while the app runs. */
     @Volatile
     private var shippedPayload: String? = null
@@ -185,6 +188,48 @@ public object Biber {
         timeoutMillis: Long = DEFAULT_TIMEOUT_MILLIS,
         environment: Map<String, String> = emptyMap(),
     ): BiberResult = waitFor(processBuilder(context, workDir, args, environment).start(), timeoutMillis)
+
+    /**
+     * Starts a warm process: the launcher with biber's Perl modules compiled, which then
+     * does the biber runs whose environment names it, in about half the time. See
+     * [BiberWarm] for what it costs and when to end it. The call returns at once; the
+     * process compiles in the background (about half a second of processor time).
+     *
+     * [environment] must be the complete environment of the runs to serve, since the
+     * process only takes runs started as it was: for runs under a TeX engine, the engine's
+     * environment after [BiberInstallation.applyTo], as in
+     *
+     * ```
+     * biber.applyTo(tex.environment(), cacheDir)
+     * val warm = Biber.warm(context, tex.environment())
+     * warm.applyTo(tex.environment())
+     * ```
+     *
+     * and for [processBuilder], that builder's environment. If something between the app
+     * and biber changes the environment (a preloaded library that edits it when the engine
+     * starts biber), pass what biber is started with. Nothing is inherited from the app's
+     * own environment. A run whose environment differs is not harmed: it is done on its own.
+     *
+     * The tree must be installed ([install]): without a current one the process ends at
+     * once ([BiberWarm.isAlive] turns false) and runs go on as without it. Not yet verified
+     * on a device; until it is, treat it as experimental.
+     *
+     * @param idleSeconds the process ends when no run came for this long; 0 for no limit.
+     * @throws UnsupportedOperationException when [isSupported] is false.
+     * @throws IOException when the process cannot be started.
+     */
+    @JvmStatic
+    @JvmOverloads
+    @Throws(IOException::class)
+    public fun warm(
+        context: Context,
+        environment: Map<String, String>,
+        idleSeconds: Int = DEFAULT_WARM_IDLE_SECONDS,
+    ): BiberWarm {
+        val exe = launcher(context)
+        if (!exe.isFile) throw UnsupportedOperationException("$LAUNCHER is not in ${exe.parent}")
+        return BiberWarm.start(exe, environment, idleSeconds)
+    }
 
     /** Collects [process]'s output (at most [MAX_OUTPUT] bytes) and waits for it, at most [timeoutMillis]. */
     internal fun waitFor(process: Process, timeoutMillis: Long): BiberResult {

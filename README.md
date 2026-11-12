@@ -113,6 +113,32 @@ Started as `tectonic-biber`, the launcher also removes the `.bib` copies Tectoni
 which Tectonic would otherwise write back into the document's folder. With a cache folder,
 `biber.applyTo(env, cacheDir)`, it reuses the previous result when the input has not changed.
 
+### A warm process: biber in half the time
+
+Over half of a biber run is Perl compiling biber's modules. From 2.21-3, `Biber.warm` starts
+a process that has done that once and then does the biber runs handed to it, each in about
+half the time (0.43 s instead of 0.87 s in the test root). Started when a compile starts, it
+is ready before the TeX engine asks for biber:
+
+```kotlin
+biber.applyTo(tex.environment(), cacheDir)
+// Once per document: the process serves runs with exactly this environment.
+val warm = Biber.warm(context, tex.environment())
+// Before each compile: starts it again if it has ended, and names it in the environment.
+warm.ensureRunning()
+warm.applyTo(tex.environment())
+// When the document is closed or the app leaves the foreground:
+warm.close()
+```
+
+A run the warm process cannot take (it is gone, busy, or was started with another
+environment) is done as before, so nothing needs checking before a compile, and a run it
+does take behaves as a run on its own: same files, output and exit status. The process holds
+about 80 MB while it waits. It ends on `close()`, after five idle minutes (a parameter), and
+with the app's process. [docs/BUILDING.md](docs/BUILDING.md#the-warm-process) has the rules
+and the measurements. It has been checked in the Android-like test root, not yet on a
+device: treat it as experimental until the Status section says otherwise.
+
 ### If your app ships zlib or libiconv too
 
 The library brings `libz1.so` and `libiconv.so`. If a library module or another dependency
@@ -197,6 +223,10 @@ times on a device. Over half of a run is Perl compiling biber's modules. `BIBER_
 [docs/BUILDING.md](docs/BUILDING.md#what-is-shipped-and-how-it-is-made)) reports where a
 run's time went.
 
+A [warm process](#a-warm-process-biber-in-half-the-time) takes a run to 0.43 s (medians of
+31 runs, taken in turns, same root and core), for 0.49 s of processor time once, on another
+core, and 79 MB of memory while it waits.
+
 ## Building from source
 
 You need an arm64 Linux host with sudo, curl, python3, patchelf, git and about 2 GB of disk.
@@ -228,13 +258,16 @@ releases.
   times and fixed offsets, and never a DateTime locale.
 - Each run starts Perl and compiles biber's modules, which takes a little under a second
   (see [Performance](#performance)). The `tectonic-biber` cache skips runs whose input has
-  not changed.
+  not changed, and a [warm process](#a-warm-process-biber-in-half-the-time) does the
+  compiling once for many runs.
 
 ## Status
 
 Every push builds the payload on GitHub's arm64 runner and runs the checks above on
 Android 9's bionic in a chroot, and an app built against the AAR packages it as required.
-Not yet verified: the AAR running inside an app on a device.
+Not yet verified: the AAR running inside an app on a device, and the warm process on a
+device (its sockets under Android's SELinux policy, and how Android treats the extra
+process).
 What changed in each release is in [CHANGELOG.md](CHANGELOG.md).
 
 ## Licences
