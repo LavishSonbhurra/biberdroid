@@ -20,8 +20,8 @@
 #            scripts/notices.py  -> out/NOTICES.txt
 #  verify    a minimal Android-like root with no Termux in it (scripts/approot.sh):
 #            fixture .bbl files byte-identical to the official biber 2.21, the
-#            launcher's Tectonic mode, a --validate-datamodel run, and biber's own
-#            test suite against the packaged tree
+#            launcher's Tectonic mode, a --validate-datamodel run, biber's own
+#            test suite against the packaged tree, and the warm process
 #  dist      release files in dist/: the payload, the jniLibs, the Perl tree as a
 #            reproducible tar.xz, notices, SHA256SUMS
 #
@@ -143,6 +143,9 @@ verify() {
   $S/tool-approot.sh
   $S/datamodel-approot.sh
   TAIL=3 $S/suite-approot.sh
+  TAIL=3 $S/suite-forked-approot.sh
+  $S/warm-approot.sh
+  $S/warm-peers-approot.sh
 }
 
 dist() {

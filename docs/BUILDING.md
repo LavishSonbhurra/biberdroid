@@ -5,6 +5,7 @@
 - [What is shipped and how it is made](#what-is-shipped-and-how-it-is-made)
 - [Checks](#checks)
 - [The Android library](#the-android-library)
+- [The warm process](#the-warm-process)
 - [Using the payload directly](#using-the-payload-directly)
 - [Pins and the download mirror](#pins-and-the-download-mirror)
 - [Regenerating the fixtures](#regenerating-the-fixtures)
@@ -92,7 +93,10 @@ The launcher's environment:
 | `BIBER_HOME` | The Perl tree. | The folder above the one holding `argv[0]`, so a link at `BIBER_HOME/bin/tectonic-biber` needs no variable. |
 | `BIBER_NATIVE_DIR` | Where the `libpl_*.so` files are. | The folder of `/proc/self/exe`, which is `nativeLibraryDir`. |
 | `BIBER_CACHE` | Optional folder for reusing results in Tectonic mode. | None. |
-| `BIBER_TIMING` | `1` prints one line on stderr saying where the run's time went (`start`, `compile`, `run`, `exit` and `total`, in milliseconds); an absolute path appends the line to that file. | None. |
+| `BIBER_WARM` | Optional address of [a warm process](#the-warm-process) that does the run: `@name` or an absolute path. | None. |
+| `BIBER_WARM_WAIT` | Milliseconds a run waits for the warm process to take it before it runs on its own. | 3000 |
+| `BIBER_WARM_IDLE` | For the warm process: seconds without a run after which it ends; 0 for no limit. | 0 |
+| `BIBER_TIMING` | `1` prints one line on stderr saying where the run's time went (`start`, `compile`, `run`, `exit` and `total`, in milliseconds; for a run a warm process did, `start`, `warm: taken after`, `run` and `total`, and for one it did not take, a line before that saying why); an absolute path appends the lines to that file. | None. |
 | `LD_LIBRARY_PATH` | Must hold `nativeLibraryDir`, for `libperl.so`. | |
 
 Started under the name `tectonic-biber`, the launcher acts as Tectonic's external tool. After
@@ -115,6 +119,9 @@ termux-docker's Android 9 `/system`, an app uid (10234), the libraries in a mock
 | `scripts/tool-approot.sh` | Tectonic mode removes only the `.bib` copies, and nothing outside a Tectonic temporary folder; the cache reuses a result for the same input, runs biber again for a changed `.bib`, replaces a broken entry and clears an old unfinished one. |
 | `scripts/datamodel-approot.sh` | `libbiber.so --validate-datamodel` under its own name, with `BIBER_HOME` set, reports the planted mistakes in `tests/datamodel`. |
 | `scripts/suite-approot.sh` | biber's own test suite (51 files, 1264 tests) against the packaged tree. |
+| `scripts/suite-forked-approot.sh` | The same suite, each test file in a child forked from a process that has already compiled the modules `bin/biber` loads, as a warm process's workers are. |
+| `scripts/warm-approot.sh` | [The warm process](#the-warm-process): the seven `.bbl` files byte-identical, with the output and exit status of a run on its own; a probe in biber's place (`tests/warm/probe.pl`) reports the same state and fails the same way in 32 cases (arguments, folder, environment, umask, priority, limits, signals, buffering, a closed pipe, a full disk, a read-only folder); how the process starts and ends, and what runs do when it is absent, stalled, stale or killed. |
+| `scripts/warm-peers-approot.sh` | The warm process against peers that are not runs (another user's, nonsense, too much, nothing at all), something else at its address, and a soak: 200 biber runs (24 at once) and 300 probe runs with no descriptor, zombie or memory left over. |
 
 `./build.sh package` also runs `scripts/check-elf.py`: every library is aarch64, aligned for
 16 KB pages, has no `RUNPATH`, and needs only shipped libraries and `libc`, `libm`, `libdl`.
@@ -143,6 +150,83 @@ fails on any difference, so a change that would break apps built against an earl
 cannot slip in. After a deliberate change, run `./gradlew :biberdroid:updateLegacyAbi` and
 commit the file. Additions are compatible; removing or changing a published symbol is not,
 so deprecate instead.
+
+## The warm process
+
+A run of biber on a small document takes 0.9 s on an Ampere Altra core; over half of it is
+Perl compiling biber's modules, the same work every time. Perl cannot save compiled code to a
+file, but a process that has compiled it can fork. `libbiber.so --biberdroid-warm` is such a
+process: it compiles biber once, listens at the address in `BIBER_WARM`, and forks a worker
+for each run that is handed to it. `Biber.warm` in the library starts one.
+
+Measured in the Android-like root on an Ampere Altra core (`scripts/warm-bench-approot.sh`,
+medians of 31 runs taken in turns), not on a phone:
+
+| | Time | Memory |
+| --- | --- | --- |
+| A run on its own | 0.87 s | 94 MB at its peak, gone when it ends |
+| A run a warm process did | 0.43 s | 29 MB of its own in the worker, gone when it ends |
+| A warm process, from its start until it is ready | 0.49 s | 79 MB resident while it waits (68 MB of it Perl's data) |
+
+The 0.49 s is processor time on another core than the caller's: started when a TeX engine
+starts, the warm process is ready long before the engine asks for biber. Its memory is the
+price, so it is meant to live only as long as runs are likely (see below).
+
+**Whose it is.** A warm process belongs to whoever started it and lives no longer:
+
+- It ends when its standard input reaches its end. Started by an app with a pipe as its
+  input, it therefore ends with the app's process, however that dies. `/dev/null` as its
+  input ends it at once.
+- It ends on SIGTERM, SIGINT or SIGHUP, and after `BIBER_WARM_IDLE` seconds without a run.
+- Runs under way finish first; the address is given up at once, so later runs work on
+  their own.
+- A run never starts a warm process and never replaces one.
+
+**The address.** `@name` is a socket in Linux's abstract namespace: nothing in the file
+system, nothing to clean up, and the name is free the moment the process ends. An absolute
+path is a socket file (mode 0600), for systems where that suits better; the process removes
+its own file when it ends, and never takes over a file that is already there, so remove a
+file a killed process left before starting another at that path. Either way both sides check
+that the other runs as the same user (`SO_PEERCRED`), and on Android SELinux lets only
+processes of the same app connect to each other.
+
+**The same run.** A run that has `BIBER_WARM` in its environment asks the process there to
+do it; `BIBER_TIMING` shows who did. What makes such a run the run it would have been:
+
+- The warm process takes only runs started as it was: the same launcher file, user, Perl
+  tree (its version marker) and environment. Variables that only a run's own process reads
+  do not count: `BIBER_WARM`, `BIBER_WARM_WAIT`, `BIBER_WARM_IDLE`, `BIBER_CACHE`,
+  `BIBER_TIMING`, and the shell's `PWD`, `OLDPWD`, `SHLVL` and `_`. So anything that was set
+  up through the environment when the process started, a preloaded library that reads its
+  limits from variables say, was set up as for the run. `BIBER_HOME` and `BIBER_NATIVE_DIR`
+  must be absolute paths, and the tree must have its `.version` marker.
+- The worker takes on the rest of the run: its standard input, output and error (the
+  descriptors themselves, so whoever reads the run's output to its end is not kept waiting
+  by the warm process, and Perl buffers them as it would in a run), working folder,
+  arguments, the whole environment, umask, resource limits, priority, and blocked and
+  ignored signals. Perl's own signal handlers, which biber installs while compiling
+  (`sigtrap`), are active in workers only.
+- The run passes the signals it receives on to the worker (HUP, INT, QUIT, TERM, PIPE,
+  ALRM, USR1, USR2), and ends as the worker ended: with its exit status, or killed by the
+  same signal. If the run is killed, so is its worker.
+- The result cache and the Tectonic clean-up happen in the run's own process, as before.
+
+Not carried over: the session, process group and controlling terminal (job control stops do
+not reach the worker), and the parent process, which is the warm process.
+
+**When it cannot be used.** Until a worker is ready and the run has told it to go, nothing
+has been done, and the run does the work itself, as if `BIBER_WARM` were not set: when no
+process listens at the address, when it is another user's, refuses (another environment, a
+replaced tree or launcher), does not answer within `BIBER_WARM_WAIT` milliseconds (it may
+still be compiling), or cannot set a worker up (a resource limit it may not raise). A run
+with a closed standard descriptor always works on its own. After "go" the work is never done
+twice: if the warm process is killed then, its worker dies with it and the run ends as
+killed, with a message on standard error.
+
+**Limits.** 16 runs at once; more wait in the queue and work on their own after
+`BIBER_WARM_WAIT`. A request (environment and arguments) may take 256 KiB. The process is
+single-threaded and does not block on any peer: a request must be complete within two
+seconds, and a peer that is another user's is dropped unread.
 
 ## Using the payload directly
 
@@ -195,7 +279,7 @@ header has the binary's URL and checksum.
 | `pins.txt`, `scripts/cpan-pins.sha256`, `source-pins.txt` | Pinned downloads. |
 | `src/` | The launcher and the module loader. |
 | `scripts/` | Build, packaging, licence and check scripts. |
-| `tests/` | Test documents, fixtures and the data model test. |
+| `tests/` | Test documents, fixtures, the data model test, and in `tests/warm` the helpers of the warm process checks. |
 | `android/` | The Android library (Gradle); `android/biberdroid/api/` holds its recorded public API. |
 | `CHANGELOG.md` | What changed in each release. |
 | `licenses/` | Licence texts of the components. |
