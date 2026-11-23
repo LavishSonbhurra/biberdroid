@@ -265,11 +265,10 @@ releases.
 
 Every push builds the payload on GitHub's arm64 runner and runs the checks above on
 Android 9's bionic in a chroot, and an app built against the AAR packages it as required.
-The warm process has been checked on one device, a Xiaomi phone on Android 11 (arm64):
-handed-over runs took about 0.32 s against about 0.79 s on their own, and the process ended
-about 0.1 s after `close()`. Other Android versions have not been checked; a run the warm
-process cannot take is done the ordinary way. Not yet verified: the AAR running inside an
-app on a device.
+The AAR has run inside an app on one device, a Xiaomi phone on Android 11 (arm64). With the
+warm process there, handed-over runs took about 0.32 s against about 0.79 s on their own,
+and the process ended about 0.1 s after `close()`. Other devices and Android versions have
+not been checked; a run the warm process cannot take is done the ordinary way.
 What changed in each release is in [CHANGELOG.md](CHANGELOG.md).
 
 ## Licences
