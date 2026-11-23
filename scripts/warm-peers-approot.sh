@@ -33,8 +33,8 @@ as_app() { sudo setpriv --reuid 10234 --regid 10234 --clear-groups python3 -I $B
 as_other() { python3 -I $B/tests/warm/peer.py "$@"; }
 await() { local i=0; while ! sudo test -e "$1" && [ $i -lt 100 ]; do sleep 0.1; i=$((i + 1)); done; }
 P=$A$H/peers
-O=$W/scratch/warm-peers   # what the peers print, on the host
-rm -rf $O; mkdir -p $O
+O=$(mktemp -d)   # what the peers print, on the host (scratch/ may belong to root)
+trap 'rm -rf "$O"' EXIT
 
 inner hold &
 await $A$H/hold.pid

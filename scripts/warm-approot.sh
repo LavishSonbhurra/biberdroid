@@ -21,8 +21,11 @@ W=${BIBER_WORK:-$B/work}   # downloads, the rootfs and build output (gitignored)
 A=$W/scratch/approot
 F=/data/data/${APP_ID:-org.example.biberhost}/files
 H=$F/home/warm
+# What the terminal run prints, on the host (scratch/ may belong to root).
+T=$(mktemp -d)
+trap 'rm -rf "$T"' EXIT
 mountpoint -q $A$H/full && sudo umount $A$H/full
-python3 -I $B/tests/warm/withpty.py $B/scripts/approot.sh run "sh $H/inner.sh terminal" > $W/scratch/warm-terminal.txt 2>&1 || true
+python3 -I $B/tests/warm/withpty.py $B/scripts/approot.sh run "sh $H/inner.sh terminal" > $T/warm-terminal.txt 2>&1 || true
 sudo rm -rf $A$H $A$F/probe $A$F/nomarker
 sudo mkdir -p $A$H/cache $A$H/full $A$F/probe/bin $A$F/nomarker/bin
 names=
@@ -49,7 +52,7 @@ for part in fixtures fresh served life; do
   $B/scripts/approot.sh run "NAMES='$names' sh $H/inner.sh $part" || true
 done
 sudo umount $A$H/full
-python3 -I $B/tests/warm/withpty.py $B/scripts/approot.sh run "sh $H/inner.sh terminal" > $W/scratch/warm-terminal.txt 2>&1 || true
+python3 -I $B/tests/warm/withpty.py $B/scripts/approot.sh run "sh $H/inner.sh terminal" > $T/warm-terminal.txt 2>&1 || true
 
 fail=0
 check() { if eval "$2"; then echo "ok   $1"; else echo "FAIL $1"; fail=1; fi; }
@@ -99,7 +102,7 @@ check "the limits are the run's" "has served/limits.out 'Max open files  *123  *
 check "ignored signals stay ignored, the others are perl's" "has served/ignored.out 'sig PIPE: IGNORE' && has served/ignored.out 'sig TERM: CODE' && has served/plain.out 'sig PIPE: CODE'"
 check "standard input is the run's" "has served/stdin.out 'stdin: 11 bytes' && has served/nullin.out 'stdin: 0 bytes'"
 check "standard output is buffered as in a run" "[ \"\$(sudo head -1 $A$H/served/order.both)\" = 'then on stderr' ]"
-check "and line by line on a terminal, as in a run" "[ \"\$(grep -A2 'by the warm process' $W/scratch/warm-terminal.txt | tr '\n' '/')\" = 'by the warm process:/first on stdout/then on stderr/' ] && [ \$(taken timing-terminal.txt) = 1 ]"
+check "and line by line on a terminal, as in a run" "[ \"\$(grep -A2 'by the warm process' $T/warm-terminal.txt | tr '\n' '/')\" = 'by the warm process:/first on stdout/then on stderr/' ] && [ \$(taken timing-terminal.txt) = 1 ]"
 check "nothing of the warm process is open in a run" "! has served/plain.out '^open: socket' && ! has served/plain.out '^open: pipe'"
 check "a signal perl traps ends the run as perl ends it" "has served/term.err 'Caught a SIGTERM' && has served/term.err 'END block ran' && has served/pipe.err 'Caught a SIGPIPE'"
 check "a reader that went away ends the run by SIGPIPE's handler" "has served/closed-reader.err 'Caught a SIGPIPE' && has served/closed-reader.err 'END block ran'"
