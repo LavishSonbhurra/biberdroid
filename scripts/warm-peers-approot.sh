@@ -29,7 +29,8 @@ echo probe-tree | sudo tee $A$F/probe/.version >/dev/null
 sudo cp $B/tests/warm/inner.sh $A$H/inner.sh
 sudo chown -R 10234:10234 $A$H $A$F/probe
 inner() { $B/scripts/approot.sh run "sh $H/inner.sh $*" || true; }
-as_app() { sudo setpriv --reuid 10234 --regid 10234 --clear-groups python3 -I $B/tests/warm/peer.py "$@"; }
+# The script comes on standard input: the app uid may not be able to read this checkout.
+as_app() { sudo setpriv --reuid 10234 --regid 10234 --clear-groups python3 -I - "$@" < $B/tests/warm/peer.py; }
 as_other() { python3 -I $B/tests/warm/peer.py "$@"; }
 await() { local i=0; while ! sudo test -e "$1" && [ $i -lt 100 ]; do sleep 0.1; i=$((i + 1)); done; }
 P=$A$H/peers
