@@ -54,7 +54,7 @@ android {
 }
 
 dependencies {
-    implementation("io.github.lavishsonbhurra:biberdroid:2.21-2")
+    implementation("io.github.lavishsonbhurra:biberdroid:2.21-3")
 }
 ```
 
@@ -122,11 +122,12 @@ is ready before the TeX engine asks for biber:
 
 ```kotlin
 biber.applyTo(tex.environment(), cacheDir)
-// Once per document: the process serves runs with exactly this environment.
+// Once per document, off the main thread: starts the process, which serves runs with
+// exactly this environment.
 val warm = Biber.warm(context, tex.environment())
-// Before each compile: starts it again if it has ended, and names it in the environment.
-warm.ensureRunning()
 warm.applyTo(tex.environment())
+// Before each later compile, off the main thread: starts it again if it has ended.
+warm.ensureRunning()
 // When the document is closed or the app leaves the foreground:
 warm.close()
 ```
@@ -136,8 +137,7 @@ environment) is done as before, so nothing needs checking before a compile, and 
 does take behaves as a run on its own: same files, output and exit status. The process holds
 about 80 MB while it waits. It ends on `close()`, after five idle minutes (a parameter), and
 with the app's process. [docs/BUILDING.md](docs/BUILDING.md#the-warm-process) has the rules
-and the measurements. It has been checked in the Android-like test root, not yet on a
-device: treat it as experimental until the Status section says otherwise.
+and the measurements, and [Status](#status) says where it has been checked.
 
 ### If your app ships zlib or libiconv too
 
@@ -188,7 +188,7 @@ plain files:
 | `SHA256SUMS` | checksums of all of the above |
 
 ```sh
-tar -xzf biberdroid-2.21-2-jniLibs-arm64-v8a.tar.gz -C app/src/main
+tar -xzf biberdroid-2.21-3-jniLibs-arm64-v8a.tar.gz -C app/src/main
 ```
 
 Unpack the Perl tree to a folder of the app's own at run time, then start
@@ -265,9 +265,11 @@ releases.
 
 Every push builds the payload on GitHub's arm64 runner and runs the checks above on
 Android 9's bionic in a chroot, and an app built against the AAR packages it as required.
-Not yet verified: the AAR running inside an app on a device, and the warm process on a
-device (its sockets under Android's SELinux policy, and how Android treats the extra
-process).
+The warm process has been checked on one device, a Xiaomi phone on Android 11 (arm64):
+handed-over runs took about 0.32 s against about 0.79 s on their own, and the process ended
+about 0.1 s after `close()`. Other Android versions have not been checked; a run the warm
+process cannot take is done the ordinary way. Not yet verified: the AAR running inside an
+app on a device.
 What changed in each release is in [CHANGELOG.md](CHANGELOG.md).
 
 ## Licences

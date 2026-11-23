@@ -14,7 +14,7 @@
  *   BIBER_CACHE       optional folder for reusing results, see below.
  *   BIBER_WARM        optional address of a warm process, see below.
  *   BIBER_WARM_WAIT   milliseconds a run waits for the warm process to take
- *                     it before it runs on its own (3000).
+ *                     it before it runs on its own (3000; at most 60000).
  *   BIBER_WARM_IDLE   for the warm process: seconds without a run after
  *                     which it stops (0, the default: never).
  *   BIBER_TIMING      1 prints where the time went on stderr when the run
@@ -628,6 +628,7 @@ static int run_perl(int argc, char **argv, const char *home) {
 
 #define WARM_MAGIC 0x31575242u   /* "BRW1" */
 #define WARM_WAIT_MS 3000        /* a run's patience until the warm process takes it */
+#define WARM_WAIT_MAX_MS 60000   /* the most BIBER_WARM_WAIT can make it: poll takes an int */
 #define WARM_REQUEST_MS 2000     /* the warm process's patience with a request */
 #define WARM_RUNS 16
 #define WARM_REQUEST (256 << 10)
@@ -1121,10 +1122,12 @@ static void read_client(struct served *r) {
         } else if (msg[i] == 'K') {
             r->half = 1;
         } else if (msg[i] == 'G' && r->state == R_OFFERED) {
-            if (write(r->sync, "g", 1) != 1) { /* the worker is gone: its exit says so */ }
+            int went = write(r->sync, "g", 1) == 1;
             close(r->sync);
             r->sync = -1;
-            r->state = R_RUNNING;
+            r->state = went ? R_RUNNING : R_ABANDONED;
+            /* The worker is gone and was never told to go: nothing ran. The run waits for our answer and does the work itself. */
+            if (!went) refuse(r, "the worker ended before the run began");
         }
     }
 }
@@ -1455,7 +1458,8 @@ static int warm_run(const char *address, int argc, char **argv, const char *home
     }
     double t0 = now_ms();
     const char *wait_text = getenv("BIBER_WARM_WAIT");
-    int patience = wait_text && atoi(wait_text) > 0 ? atoi(wait_text) : WARM_WAIT_MS;
+    long wait_given = wait_text ? strtol(wait_text, NULL, 10) : 0;
+    int patience = wait_given <= 0 ? WARM_WAIT_MS : wait_given > WARM_WAIT_MAX_MS ? WARM_WAIT_MAX_MS : (int)wait_given;
     double deadline = t0 + patience;
 
     mode_t mask = umask(0);

@@ -94,7 +94,7 @@ The launcher's environment:
 | `BIBER_NATIVE_DIR` | Where the `libpl_*.so` files are. | The folder of `/proc/self/exe`, which is `nativeLibraryDir`. |
 | `BIBER_CACHE` | Optional folder for reusing results in Tectonic mode. | None. |
 | `BIBER_WARM` | Optional address of [a warm process](#the-warm-process) that does the run: `@name`. | None. |
-| `BIBER_WARM_WAIT` | Milliseconds a run waits for the warm process to take it before it runs on its own. | 3000 |
+| `BIBER_WARM_WAIT` | Milliseconds a run waits for the warm process to take it before it runs on its own, at most 60000. | 3000 |
 | `BIBER_WARM_IDLE` | For the warm process: seconds without a run after which it ends; 0 for no limit. | 0 |
 | `BIBER_TIMING` | `1` prints one line on stderr saying where the run's time went (`start`, `compile`, `run`, `exit` and `total`, in milliseconds; for a run a warm process did, `start`, `warm: taken after`, `run` and `total`, and for one it did not take, a line before that saying why); an absolute path appends the lines to that file. | None. |
 | `LD_LIBRARY_PATH` | Must hold `nativeLibraryDir`, for `libperl.so`. | |
@@ -214,7 +214,13 @@ do it; `BIBER_TIMING` shows who did. What makes such a run the run it would have
 - The result cache and the Tectonic clean-up happen in the run's own process, as before.
 
 Not carried over: the session, process group and controlling terminal (job control stops do
-not reach the worker), and the parent process, which is the warm process.
+not reach the worker), and the parent process. A worker is a child of the warm process, not
+of the program that asked for the run:
+
+- It is moved to the run's folder with `fchdir`, so a preloaded library that records the
+  working folder when it loads sees the warm process's.
+- Seccomp filters, `no_new_privs`, the cgroup, `oom_score_adj`, CPU affinity and the
+  scheduling policy are the warm process's, not the caller's.
 
 **When it cannot be used.** Until a worker is ready and the run has told it to go, nothing
 has been done, and the run does the work itself, as if `BIBER_WARM` were not set: when no
@@ -223,18 +229,21 @@ replaced tree or launcher), does not answer within `BIBER_WARM_WAIT` millisecond
 still be compiling), or cannot set a worker up (a resource limit it may not raise). A run
 with a closed standard descriptor always works on its own. After "go" the work is never done
 twice: if the warm process is killed then, its worker dies with it and the run ends as
-killed, with a message on standard error.
+killed, with a message on standard error. Once a worker has been told to go, the run waits
+for it without a time limit, so a warm process that is frozen rather than dead holds its
+runs until it is resumed or killed.
 
 All workers of one warm process share its Perl hash seed, where every run on its own has a
 new one. The seed places the keys of the hashes made while compiling, an order no run may
 rely on, since it differs between two runs on their own; the order of hashes made in a run
 is varied per worker.
 
-**Limits.** 16 runs at once; more wait in the queue and work on their own after
-`BIBER_WARM_WAIT`. A request (environment and arguments) may take 256 KiB. The process is
-single-threaded and does not block on any peer: a request must be complete within two
-seconds, a run must start the worker it was offered within two seconds, and a peer that is
-another user's is dropped unread.
+**Limits.** 16 runs at once. About as many more wait to be taken, and work on their own when
+that takes longer than `BIBER_WARM_WAIT`; beyond those nothing queues: the connection fails at
+once and the run is done the ordinary way. A request (environment and arguments) may take 256
+KiB. The process is single-threaded and does not block on any peer: a request must be complete
+within two seconds, a run must start the worker it was offered within two seconds, and a peer
+that is another user's is dropped unread.
 
 ## Using the payload directly
 

@@ -14,20 +14,24 @@ class BiberWarmTest {
     private val root: File = Files.createTempDirectory("warm").toFile()
     private val seen = File(root, "seen.txt")
 
-    /** Says it is ready as the launcher does, then lives until its standard input ends. */
     private fun launcher(body: String): File = File(root, "libbiber.so").apply {
         writeText("#!/bin/sh\n$body\n")
         setExecutable(true)
     }
 
+    /**
+     * Says it is ready as the launcher does, then lives until its standard input ends or
+     * SIGTERM comes, and like the launcher ends by itself then.
+     */
     private val wellBehaved = """
+        trap : TERM
         /usr/bin/env > '${seen.path}'; echo "args: $*" >> '${seen.path}'
         echo "biber: warm process ready at ${'$'}BIBER_WARM, compiled in 1 ms"
         while read -r line; do :; done
         echo ended >> '${seen.path}'
     """.trimIndent()
 
-    /** Waits for the script to have written its last line, which it does when its input ends. */
+    /** Waits for the script to have written its last line, which it does when it was told to end. */
     private fun awaitEnd(): Boolean {
         repeat(200) {
             if (seen.isFile && seen.readLines().lastOrNull() == "ended") return true
@@ -63,7 +67,8 @@ class BiberWarmTest {
 
     @Test
     fun closeEndsTheProcessByItsStandardInput() {
-        val warm = BiberWarm.start(launcher(wellBehaved), mapOf("PATH" to "/usr/bin:/bin"), 0)
+        // Deaf to SIGTERM: the end of its input is all that ends it.
+        val warm = BiberWarm.start(launcher(wellBehaved.replace("trap : TERM", "trap '' TERM")), mapOf("PATH" to "/usr/bin:/bin"), 0)
         assertTrue(warm.awaitReady(5_000))
         assertFalse(warm.awaitEnd(100))
         warm.close()
@@ -73,6 +78,25 @@ class BiberWarmTest {
         // It ended by itself, having seen the end of its input: it was not killed.
         assertEquals("ended", seen.readLines().last())
         assertFalse(warm.awaitReady(100))
+    }
+
+    @Test
+    fun closeEndsAProcessWhoseStandardInputNeverEnds() {
+        // As when another process holds the pipe: this one does not look at its input at all.
+        val deaf = """
+            trap 'echo ended >> "${seen.path}"; exit 0' TERM
+            echo started > '${seen.path}'
+            echo "biber: warm process ready at ${'$'}BIBER_WARM, compiled in 1 ms"
+            while :; do sleep 0.05; done
+        """.trimIndent()
+        val warm = BiberWarm.start(launcher(deaf), mapOf("PATH" to "/usr/bin:/bin"), 0)
+        assertTrue(warm.awaitReady(5_000))
+        assertFalse(warm.awaitEnd(200))
+        warm.close()
+        assertFalse(warm.isAlive)
+        assertTrue(warm.awaitEnd(5_000))
+        // By SIGTERM, which it handled: it was not killed outright.
+        assertEquals("ended", seen.readLines().last())
     }
 
     @Test
@@ -112,6 +136,74 @@ class BiberWarmTest {
         assertTrue((System.nanoTime() - start) / 1_000_000 < 3_500)
         assertTrue(warm.isAlive)
         assertTrue("BIBER_WARM=${warm.address}" in seen.readLines())
+        warm.close()
+    }
+
+    /** A process that counts its starts in [seen], and when told to end lives on for [lingerSeconds]. */
+    private fun lingering(lingerSeconds: Int) = """
+        trap : TERM
+        echo start >> '${seen.path}'
+        echo "biber: warm process ready at ${'$'}BIBER_WARM, compiled in 1 ms"
+        while read -r line; do :; done
+        sleep $lingerSeconds
+    """.trimIndent()
+
+    /** Runs ensureRunning on a thread of its own and returns once it waits for the process before. */
+    private fun ensureRunningElsewhere(warm: BiberWarm): Thread {
+        val thread = Thread { warm.ensureRunning() }
+        thread.start()
+        repeat(200) {
+            if (thread.state == Thread.State.TIMED_WAITING) return thread
+            Thread.sleep(5)
+        }
+        return thread
+    }
+
+    @Test
+    fun othersAreNotKeptWaitingWhileEnsureRunningWaits() {
+        val warm = BiberWarm.start(launcher(lingering(3)), mapOf("PATH" to "/usr/bin:/bin"), 0)
+        assertTrue(warm.awaitReady(5_000))
+        warm.close()
+        val thread = ensureRunningElsewhere(warm)
+        assertEquals(Thread.State.TIMED_WAITING, thread.state)
+        val start = System.nanoTime()
+        assertFalse(warm.isAlive)
+        assertFalse(warm.awaitReady(0))
+        assertTrue(warm.output.contains("ready at"))
+        warm.toString()
+        assertTrue((System.nanoTime() - start) / 1_000_000 < 400)
+        thread.join(10_000)
+        assertTrue(warm.isAlive)
+        warm.close()
+    }
+
+    @Test
+    fun closeWhileEnsureRunningWaitsLeavesNoProcessRunning() {
+        val warm = BiberWarm.start(launcher(lingering(2)), mapOf("PATH" to "/usr/bin:/bin"), 0)
+        assertTrue(warm.awaitReady(5_000))
+        warm.close()
+        val thread = ensureRunningElsewhere(warm)
+        assertEquals(Thread.State.TIMED_WAITING, thread.state)
+        warm.close()
+        thread.join(10_000)
+        assertFalse(thread.isAlive)
+        // The process it started was told to end as well.
+        assertFalse(warm.isAlive)
+        assertTrue(warm.awaitEnd(10_000))
+    }
+
+    @Test
+    fun ensureRunningFromSeveralThreadsStartsOneProcess() {
+        val warm = BiberWarm.start(launcher(lingering(0)), mapOf("PATH" to "/usr/bin:/bin"), 0)
+        assertTrue(warm.awaitReady(5_000))
+        warm.close()
+        assertTrue(warm.awaitEnd(5_000))
+        val threads = List(8) { Thread { warm.ensureRunning() } }
+        threads.forEach { it.start() }
+        threads.forEach { it.join(10_000) }
+        assertTrue(warm.awaitReady(5_000))
+        assertTrue(warm.isAlive)
+        assertEquals(2, seen.readLines().count { it == "start" })
         warm.close()
     }
 

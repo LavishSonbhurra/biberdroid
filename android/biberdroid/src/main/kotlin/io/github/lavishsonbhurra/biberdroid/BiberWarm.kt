@@ -61,7 +61,12 @@ public class BiberWarm internal constructor(
         var closed = false
     }
 
+    /** The process started last, and how often [close] was called: both guarded by this object. */
     private var run: Run? = null
+    private var closes = 0
+
+    /** Held while a process is started, so that only one thread starts one. Nothing else waits for it. */
+    private val starting = Any()
 
     /**
      * Whether the process is running and takes runs. False after [close] (even while it
@@ -73,16 +78,25 @@ public class BiberWarm internal constructor(
 
     /**
      * Starts the process unless it is running, at the same [address] and with the same
-     * environment as before, and returns at once: the process compiles in the background.
-     * Call it before a compile that may need biber; when the process is running this costs
-     * nothing.
+     * environment as before, and returns without waiting for it: the process compiles in
+     * the background. Call it before a compile that may need biber; when the process is
+     * running this costs nothing.
+     *
+     * Starting a process takes a moment, and after a [close] this waits up to a second for
+     * the process before: do not call it on the main thread. A [close] that comes while
+     * this starts a process ends that process too.
      *
      * @throws IOException when the process cannot be started.
      */
     @Throws(IOException::class)
     public fun ensureRunning() {
-        synchronized(this) {
-            val current = run
+        synchronized(starting) {
+            val current: Run?
+            val closesSeen: Int
+            synchronized(this) {
+                current = run
+                closesSeen = closes
+            }
             if (current != null && current.process.isAlive) {
                 if (!current.closed) return
                 // Told to end: it gives up the address as soon as it sees its input end, and
@@ -102,10 +116,14 @@ public class BiberWarm internal constructor(
             env[ENV_ADDRESS] = address
             if (idleSeconds > 0) env[ENV_IDLE] = idleSeconds.toString() else env.remove(ENV_IDLE)
             val started = Run(pb.start())
-            run = started
+            val closedMeanwhile = synchronized(this) {
+                run = started
+                closes != closesSeen
+            }
             val reader = Thread({ read(started) }, "biber-warm")
             reader.isDaemon = true
             reader.start()
+            if (closedMeanwhile) end(started)
         }
     }
 
@@ -181,12 +199,21 @@ public class BiberWarm internal constructor(
         }
 
     /**
-     * Tells the process to end, and returns at once. Runs it is doing finish first; runs
-     * that come later are done on their own, until [ensureRunning] starts a process
-     * again. Calling it again does nothing.
+     * Tells the process to end, and returns at once: its standard input is closed and it is
+     * sent SIGTERM (`Process.destroy`), so that it also ends when another process of the
+     * app has inherited the pipe. Runs it is doing finish first; runs that come later are
+     * done on their own, until [ensureRunning] starts a process again. Calling it again
+     * does nothing.
      */
     override fun close() {
-        val run = synchronized(this) { run } ?: return
+        val run = synchronized(this) {
+            closes++
+            run
+        } ?: return
+        end(run)
+    }
+
+    private fun end(run: Run) {
         run.closed = true
         try {
             // The end of its standard input is what the process waits for.
@@ -194,6 +221,9 @@ public class BiberWarm internal constructor(
         } catch (_: IOException) {
             // Already ended.
         }
+        // And SIGTERM, which the launcher takes the same way: its input does not end while
+        // some other process holds the pipe's other end.
+        run.process.destroy()
     }
 
     /** For logs: the address and whether the process is running. */

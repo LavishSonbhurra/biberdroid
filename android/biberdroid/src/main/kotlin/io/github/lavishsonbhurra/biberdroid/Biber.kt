@@ -192,8 +192,9 @@ public object Biber {
     /**
      * Starts a warm process: the launcher with biber's Perl modules compiled, which then
      * does the biber runs whose environment names it, in about half the time. See
-     * [BiberWarm] for what it costs and when to end it. The call returns at once; the
-     * process compiles in the background (about half a second of processor time).
+     * [BiberWarm] for what it costs and when to end it. The call starts a process, so do
+     * not make it on the main thread; it does not wait for the process, which compiles in
+     * the background (about half a second of processor time).
      *
      * [environment] must be the complete environment of the runs to serve, since the
      * process only takes runs started as it was: for runs under a TeX engine, the engine's
@@ -211,8 +212,12 @@ public object Biber {
      * own environment. A run whose environment differs is not harmed: it is done on its own.
      *
      * The tree must be installed ([install]): without a current one the process ends at
-     * once ([BiberWarm.isAlive] turns false) and runs go on as without it. Not yet verified
-     * on a device; until it is, treat it as experimental.
+     * once ([BiberWarm.isAlive] turns false) and runs go on as without it.
+     *
+     * Checked on one device, a Xiaomi phone on Android 11 (arm64): handed-over runs took
+     * about 0.32 s against about 0.79 s on their own, and the process ended about 0.1 s
+     * after [BiberWarm.close]. Other Android versions have not been checked; a run the warm
+     * process cannot take is done the ordinary way.
      *
      * @param idleSeconds the process ends when no run came for this long; 0 for no limit.
      * @throws UnsupportedOperationException when [isSupported] is false.

@@ -1,13 +1,16 @@
 # Changelog
 
-## 2.21-3 (not yet released)
+## 2.21-3
 
 The same biber 2.21, Perl, CPAN modules and Termux libraries, and the same Perl tree byte for
 byte (SHA-256 `4aab1415...`, so an app updating from 2.21-2 does not unpack it again). Only
-the launcher changed (`libbiber.so`, 39.9 KB instead of 16.8 KB). Runs that do not use the
+the launcher changed (`libbiber.so`, 40.1 KB instead of 16.8 KB). Runs that do not use the
 new feature are done by the same code as before.
 
-A warm process, for biber runs in half the time (experimental until checked on a device):
+A warm process, for biber runs in half the time. It has been checked on one device, a Xiaomi
+phone on Android 11 (arm64), where handed-over runs took about 0.32 s against about 0.79 s on
+their own and the process ended about 0.1 s after `close()`. Other Android versions have not
+been checked; a run the warm process cannot take is done the ordinary way.
 
 - `libbiber.so --biberdroid-warm` compiles biber's Perl modules once, listens at the address
   in `BIBER_WARM` (a name in Linux's abstract socket namespace) and forks a
@@ -24,9 +27,9 @@ A warm process, for biber runs in half the time (experimental until checked on a
   that compiled biber first (`scripts/suite-forked-approot.sh`).
 - A run that cannot be handed over is done as before: no process at the address, another
   user's process, another environment, Perl tree or launcher, a process that does not answer
-  within `BIBER_WARM_WAIT` milliseconds (3000), or a closed standard descriptor. Once a
-  worker has been told to go, the work is never done twice: if the warm process is killed
-  then, the run fails.
+  within `BIBER_WARM_WAIT` milliseconds (3000, at most 60000), a worker that ended before it
+  was told to go, or a closed standard descriptor. Once a worker has been told to go, the
+  work is never done twice: if the warm process is killed then, the run fails.
 - The process belongs to its starter: it ends when its standard input ends (so with the app
   that holds the pipe), on SIGTERM, SIGINT or SIGHUP, or after `BIBER_WARM_IDLE` seconds
   without a run, and lets runs under way finish. A run never starts one.
@@ -42,6 +45,10 @@ Added to the Android library, source and binary compatible with 2.21-2:
   `ensureRunning()` starts it again after it ended (at the same address), `serves(env)` says
   whether a compile's runs would be handed over, `awaitReady`, `awaitEnd`, `isAlive`,
   `output` and `close()`. `Biber.DEFAULT_WARM_IDLE_SECONDS` is 300.
+- `close()` closes the process's standard input and also sends it SIGTERM, so it ends even
+  when another process of the app has inherited the pipe. `ensureRunning()` no longer keeps
+  other threads' calls waiting while it waits for the process before; like `Biber.warm` it
+  starts a process, so call both off the main thread.
 
 ## 2.21-2
 
